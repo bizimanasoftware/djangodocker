@@ -145,17 +145,12 @@ WSGI_APPLICATION = 'gloexproject.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.environ.get('MYSQL_DB', 'gloexdbp'),
-        'USER': os.environ.get('MYSQL_USER', 'gloexuserp'),
-        'PASSWORD': os.environ.get('MYSQL_PASSWORD', '18MilKyBM24'),
-        'HOST': os.environ.get('MYSQL_HOST', 'db'),  # matches docker-compose service name
-        'PORT': os.environ.get('MYSQL_PORT', '3306'),
-        'OPTIONS': {
-            'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",
-            'charset': 'utf8mb4',
-        },
-        'CONN_MAX_AGE': 60,  # optional: persistent DB connections
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.getenv('POSTGRES_DB'),
+        'USER': os.getenv('POSTGRES_USER'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
+        'HOST': os.getenv('POSTGRES_HOST'),
+        'PORT': os.getenv('POSTGRES_PORT', '5432'),
     }
 }
 
