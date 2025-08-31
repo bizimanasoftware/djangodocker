@@ -1,0 +1,638 @@
+/* Animation for the logo's left-to-right movement */
+@keyframes slide-ping-pong {
+    0% {
+        transform: translateX(-250px);
+    }
+    100% {
+        transform: translateX(250px);
+    }
+}
+
+/* Styles for the container that holds the logo */
+.floating-logo-container {
+    position: absolute;
+    top: 50%; /* Adjust this value to place it correctly below your header */
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 36rem;
+    height: 36rem;
+    pointer-events: none; /* Allows clicks to pass through to the content behind it */
+}
+
+/* Styles for the logo image itself */
+.floating-logo {
+    width: 9rem; /* 144px */
+    height: 9rem; /* 144px */
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 9999px; /* This makes it a circle */
+    border: 2px solid white;
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    animation: slide-ping-pong 8s ease-in-out infinite alternate;
+}
+
+/*
+ * This CSS file applies a full-page sharp watery background animation.
+ * It also includes a professional palette with specific green header/footer,
+ * pure black text, professional font families, preloader,
+ * floating donate button, and responsive adjustments.
+ */
+
+/* --- Global Styling: Full screen with sharp watery background animation --- */
+html, body {
+  height: 100%;
+  margin: 0;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden; /* Prevents horizontal scrollbar if background animation extends beyond viewport */
+}
+
+body {
+  /* Sharp Watery Background Styles */
+  background: linear-gradient(
+    45deg,
+    #42a5f5 0%, #42a5f5 25%,
+    #2196f3 25%, #2196f3 50%,
+    #1e88e5 50%, #1e88e5 75%,
+    #1976d2 75%, #1976d2 100%
+  );
+  background-size: 400% 400%; /* Larger background for animation to move across */
+  animation: sharp-watery-animation 15s linear infinite alternate; /* Linear animation for sharper transitions */
+
+  /* Font and text color for elements directly on body, before winter-container */
+  font-family: 'Georgia', serif; /* Classic serif font for body */
+  color: #FFFFFF; /* Pure black text */
+  line-height: 1.6;
+  padding-top: 80px; /* Adjust based on fixed header's actual height */
+}
+
+/* Keyframes for the sharp watery animation */
+@keyframes sharp-watery-animation {
+  0% {
+    background-position: 0% 0%;
+  }
+  100% {
+    background-position: 100% 100%;
+  }
+}
+
+/* --- Preloader Styles â³ --- */
+#preloader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--gloex-offwhite); /* Using a Gloex variable */
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.loader {
+  border: 8px solid var(--gloex-light-gray); /* Using a Gloex variable */
+  border-top: 8px solid var(--gloex-green); /* Using a Gloex variable */
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+#preloader {
+    /* This makes sure the preloader covers the whole screen */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: #008000; /* You can change this background color */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.preloader-logo {
+    width: 150px; /* Adjust the size of the logo */
+    height: auto; /* This keeps the image from looking stretched */
+}
+
+/* --- Header Styling (Targets the <nav> element) --- */
+.navbar.bg-pure-green {
+  background-color: var(--header-bg-pure-green) !important;
+  border-bottom: none;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  backdrop-filter: saturate(180%) blur(12px);
+  -webkit-backdrop-filter: saturate(180%) blur(12px);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1030;
+}
+
+/* Header Content: Navbar Brand */
+.navbar-brand {
+  font-family: 'Playfair Display', serif;
+  color: var(--header-text-white) !important;
+  font-weight: 700;
+  font-size: 2.2rem;
+  letter-spacing: 0.5px;
+  text-shadow: 1px 1px 2px rgba(0,0,0,0.4);
+}
+
+/* Header Content: Navigation Links */
+.navbar-nav .nav-item .nav-link {
+  color: var(--header-text-white) !important;
+  font-weight: 700;
+  transition: color 0.3s ease-in-out, background-color 0.3s ease-in-out, transform 0.2s ease-in-out;
+  border-radius: 5px;
+  padding: 10px 18px;
+}
+.navbar-nav .nav-item .nav-link:hover,
+.navbar-nav .nav-item .nav-link.active {
+  color: var(--header-text-hover-white) !important;
+  background-color: rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+/* Navbar Toggler (for mobile menu icon) */
+.navbar-toggler {
+  border-color: rgba(255, 255, 255, 0.3) !important;
+}
+.navbar-toggler-icon {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.8%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e") !important;
+}
+
+/* Custom Button Styling (e.g., Login/Register in header) */
+.btn-outline-custom {
+  color: #008000;
+  border-color: #c9fd06;
+  transition: all 0.3s ease-in-out;
+  font-weight: 700;
+  background-color: transparent;
+}
+.btn-outline-custom:hover {
+  background-color: #c9fd06;
+  color: var(--header-bg-pure-green);
+  box-shadow: 0 2px 5px rgba(255, 255, 255, 0.3);
+}
+
+/* Fixed Header Shadow on Scroll (JS will add 'scrolled' class) */
+.navbar.fixed-top.scrolled {
+  box-shadow: 0 6px 15px rgba(0,0,0,0.4);
+}
+
+/* --- New: Winter-Themed Content Container ðŸŒ¨ï¸ --- */
+.winter-container {
+  position: relative;
+  z-index: 1;
+  /* Adjust padding-top to ensure content is not hidden by the fixed header */
+  padding-top: 1rem;
+  /* Use a semi-transparent background to let the watery animation show through */
+  background: #c9fd06;
+  backdrop-filter: blur(5px); /* Blurs the background behind the container */
+  min-height: calc(100vh - 80px); /* Ensure it covers the remaining viewport height */
+  color: #FFFFFF; /* Ensure text within is black */
+}
+
+/* Ensure content inside winter-container has appropriate margins/padding */
+.winter-container .container {
+    padding-top: 2rem;
+    padding-bottom: 2rem;
+}
+
+/* --- New: Winter-Themed Card Style â„ï¸ --- */
+/* This style applies to any card-like elements within the winter-container */
+.winter-card {
+  background-color: #c9fd06;
+  border-radius: 15px;
+  box-shadow: 0 4px 20px var(--shadow-color);
+  padding: 2rem;
+  height: 100%;
+}
+
+/* --- Text Style Adjustments --- */
+/* A new class for small, bold text */
+.small-bold-text {
+  font-size: small !important;
+  font-weight: bold !important;
+}
+
+/* Applying small and bold font to all general text within the main content */
+.winter-container p,
+.winter-container li,
+.winter-container .card-text {
+  font-size: small !important;
+  font-weight: bold !important;
+}
+.winter-container .text-muted {
+  font-size: smaller !important;
+  font-weight: bold !important;
+}
+
+/* --- Footer Styling (Targets the <footer> element) --- */
+footer {
+  background-color: var(--footer-bg-off-green);
+  color: var(--header-text-white);
+  padding: 25px 0;
+  text-align: center;
+  border-top: 3px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 -4px 10px rgba(0, 0, 0, 0.2);
+  position: relative; /* Ensure footer is below winter-container */
+  z-index: 1;
+}
+
+footer h5 {
+  color: var(--header-text-white);
+  font-size: 1.1rem;
+  margin-bottom: 15px;
+  font-weight: 700;
+}
+
+footer a {
+  color: var(--header-text-hover-white);
+  text-decoration: none;
+  transition: color 0.3s ease-in-out;
+  font-weight: normal;
+}
+
+footer a:hover {
+  color: var(--header-text-white);
+  text-decoration: underline;
+}
+
+footer .text-muted {
+  color: rgba(255, 255, 255, 0.6) !important;
+}
+
+/* --- General Link Styling --- */
+a {
+  color: #008000;
+  text-decoration: none;
+  transition: color 0.2s ease-in-out;
+}
+
+a:hover {
+  color: #008000;
+  text-decoration: underline;
+}
+
+/* --- Floating Donate Button --- */
+.floating-donate-button {
+  position: fixed;
+  bottom: 30px;
+  right: 20px;
+  background: linear-gradient(45deg, #008000);
+  color: var(--header-text-white);
+  padding: 8px 15px;
+  font-size: 0.9rem;
+  font-weight: bold;
+  border-radius: 12px;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.3);
+  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+  z-index: 1000;
+  text-decoration: none;
+  letter-spacing: 0.5px;
+  border: 0px solid var(--header-text-white);
+}
+.floating-donate-button:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.4);
+  color: var(--header-text-hover-white);
+  text-decoration: none;
+}
+.floating-donate-button:visited,
+.floating-donate-button:active {
+  color: var(--header-text-white);
+}
+
+/* --- Alert messages --- */
+.alert-success { background-color: #d4edda; border-color: #c3e6cb; color: #155724; }
+.alert-info { background-color: #d1ecf1; border-color: #bee5eb; color: #0c5460; }
+.alert-warning { background-color: #fff3cd; border-color: #ffeeba; color: #856404; }
+.alert-danger { background-color: #f8d7da; border-color: #f5c6cb; color: #721c24; }
+.alert-dismissible .btn-close {
+  color: inherit;
+  opacity: 0.7;
+  text-shadow: none;
+}
+.alert-dismissible .btn-close:hover {
+  opacity: 1;
+}
+
+/* --- Forms --- */
+.form-control {
+  border-color: #c9fd06;
+  border-radius: 4px;
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.075);
+}
+.form-control:focus {
+  border-color: #c9fd06;
+  box-shadow: 0 0 0 0.25rem rgba(0, 100, 0, 0.25);
+}
+
+/* --- General Buttons --- */
+.btn {
+  font-weight: 600;
+  border-radius: 4px;
+  transition: all 0.2s ease-in-out;
+}
+.btn-primary {
+  background-color: #c9fd06;
+  border-color: #008000;
+  color: white;
+  font-weight: 700;
+}
+.btn-primary:hover {
+  background-color: #c9fd06;
+  border-color: #008000;
+}
+.btn-outline-primary {
+  color: var(--link-color-main);
+  border-color: var(--link-color-main);
+  font-weight: 700;
+}
+.btn-outline-primary:hover {
+  background-color: var(--link-color-main);
+  color: white;
+}
+
+/* --- Gloex Custom Text & Background Colors --- */
+.text-gloex-green { color: var(--gloex-green) !important; }
+.text-gloex-gold { color: var(--gloex-gold) !important; }
+.text-gloex-silver { color: var(--gloex-silver) !important; }
+.text-gloex-text-muted { color: var(--gloex-text-muted) !important; }
+.text-gloex-dark { color: var(--gloex-dark) !important; }
+.bg-gloex-light-gray { background-color: var(--gloex-light-gray) !important; }
+.bg-gloex-offwhite { background-color: var(--gloex-offwhite) !important; }
+
+
+/* --- Gloex Custom Button Styles --- */
+.btn-gloex-green {
+  background-color: #008000;
+  color: white;
+  border: 1px solid var(--gloex-green);
+  transition: all 0.3s ease;
+}
+.btn-gloex-green:hover {
+  background-color: #008000;
+  border-color: var(--gloex-green-dark);
+  color: white;
+}
+.btn-outline-gloex-green {
+  color: var(--gloex-green);
+  border: 1px solid var(--gloex-green);
+  background-color: transparent;
+  transition: all 0.3s ease;
+}
+.btn-outline-gloex-green:hover {
+  background-color: #008000;
+  color: white;
+}
+
+/* --- Gloex Card Borders --- */
+.border-gloex-green {
+  border-color: #008000 !important;
+}
+
+/* --- Gloex Card Hover Effect (Visual Polish) --- */
+.card-hover:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+  transition: all 0.3s ease-in-out;
+}
+
+/* --- Live Sponsorship Wall Animation (Simulated Dynamic Effect) --- */
+.live-sponsorship-wall {
+  overflow: hidden;
+  height: 150px;
+  position: relative;
+}
+.live-sponsorship-content {
+  position: absolute;
+  width: 100%;
+  animation: scroll-up 15s linear infinite;
+}
+/* Pause animation on hover */
+.live-sponsorship-wall:hover .live-sponsorship-content {
+  animation-play-state: paused;
+}
+/* Keyframes for the scrolling animation */
+@keyframes scroll-up {
+  0% { transform: translateY(100%); }
+  100% { transform: translateY(-100%); }
+}
+
+/* --- Headings Font (Example, ensure fonts are linked if not system defaults) --- */
+h1, h2, h3, h4, h5, h6 {
+  /* Use 'Playfair Display' from the main theme */
+  font-family: 'Playfair Display', serif;
+  color: var(--middle-page-text-black); /* Ensure headings are black */
+}
+
+p, li, address, blockquote, .card-text, .text-muted-main {
+  color: var(--middle-page-text-black); /* Ensure general text is black */
+}
+
+/* Ensuring Bootstrap's .text- classes also respect the new black color */
+.text-body, .text-dark {
+  color: var(--middle-page-text-black) !important;
+}
+/* If you use .text-primary, .text-success, etc., ensure they are still green/other colors */
+.text-primary { color: var(--link-color-main) !important; font-weight: 700; }
+.text-success { color: var(--link-color-main) !important; font-weight: 700; }
+.text-danger { color: #dc3545 !important; }
+.text-warning { color: #ffc107 !important; }
+.text-info { color: #17a2b8 !important; }
+
+
+/* --- Media Query for Mobile/Tablet --- */
+@media (max-width: 991.98px) {
+  /* Header adjustments for mobile */
+  .navbar-brand {
+    font-size: 1.8rem;
+  }
+  .navbar-nav .nav-item .nav-link {
+    /* Adjusted padding to allow more space for links on mobile */
+    padding: 8px 10px;
+  }
+  .navbar-collapse {
+    background-color: var(--header-bg-pure-green);
+    border-top: 1px solid rgba(255,255,255,0.1);
+    padding: 10px 0;
+  }
+  .navbar.fixed-top.scrolled {
+    box-shadow: none;
+  }
+
+  /* Adjust floating button position for mobile */
+  .floating-donate-button {
+    bottom: 15px;
+    right: 15px;
+    padding: 6px 12px;
+    font-size: 0.7rem;
+  }
+}
+
+/* Universal rule to ensure content doesn't overflow its container */
+* {
+  box-sizing: border-box; /* Ensures padding and border are included in the element's total width */
+}
+img, video, iframe, table, blockquote {
+  max-width: 100%; /* Ensures these elements don't exceed the width of their container */
+  height: auto; /* Maintains aspect ratio */
+}
+/* Ensure long words and URLs break to prevent horizontal scrolling */
+p, li, a, blockquote {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+}
+/* Featured talents section */
+.latest-profiles .profiles-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+}
+
+.profile-card {
+    background: linear-gradient(45deg,#42a5f5 0%,#42a5f5 25%,#2196f3 25%,#2196f3 50%,#1e88e5 50%,#1e88e5 75%,#1976d2 75%,#1976d2 100%);
+    max-width: 180px;            /* limit card width for compactness */
+    margin: auto;
+    padding: 0.8rem;
+    border-radius: 12px;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.08);
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+
+.profile-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.12) !important;
+}
+
+.profile-card img.card-img-top {
+    height: auto;  /* maintain aspect ratio */
+    width: 100%; /* make image full width of card minus padding */
+    aspect-ratio: 1;  /* keep square */
+    object-fit: cover;
+    border-radius: 50%;         /* circular avatar */
+    margin: 0 auto 0.5rem auto; /* center and spacing below */
+    border: 2px solid #008000;  /* subtle brand-colored border */
+}
+
+.profile-card .card-body {
+    padding: 0.5rem 0 0 0;
+}
+
+.profile-card .card-title {
+    font-size: 1rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.profile-card .card-text .badge {
+    display: inline-block;
+    white-space: normal;      /* allow wrapping */
+    word-wrap: break-word;    /* break long words if needed */
+    max-width: 100%;          /* keep inside card width */
+    padding: 0.3em 0.5em;
+    font-size: 0.75rem;
+    box-sizing: border-box;   /* include padding in width */
+}
+
+}
+
+.profile-card .btn {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.75rem;
+    margin-top: 0.5rem;
+}
+
+.badge-green {
+    background-color: #c9fd06;  /* Bootstrap success green */
+    color: white;
+}
+.profile-card p {
+  background-color: #c9fd06;
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 5px;
+  display: inline-block;
+  word-wrap: break-word;
+  max-width: 100%;
+  margin: 0 auto 0.5rem;
+  font-size: 0.875rem;
+}
+.profile-card h3 {
+  margin: 0.5rem 0 0.25rem;
+  font-size: 1rem;
+  overflow-wrap: break-word;
+  white-space: normal;
+}
+
+/* Default position for larger screens (laptops, desktops) */
+#listenButton {
+    position: fixed;
+    top: 20px;
+    left: 30%; /* Positions the button in the top-left corner */
+    z-index: 1050;
+    background-color: rgba(40, 167, 69, 0.8);
+    color: white;
+    border: none;
+    padding: 7px 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.3s ease;
+}
+
+#listenButton:hover {
+    background-color: rgba(40, 167, 69, 1);
+}
+
+/* Media query for smaller screens (mobile devices) */
+@media (max-width: 768px) {
+    #listenButton {
+        left: 50%; /* Moves the button's starting point to the horizontal center */
+        transform: translateX(-50%); /* Shifts the button back by half its own width */
+    }
+}
+
+#installPrompt {
+  position: fixed;
+  bottom: 70px;
+  right: 20px;
+  background: #008000;
+  color: white;
+  padding: 6px 10px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  display: none;         /* shown dynamically by JS */
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  cursor: pointer;
+  z-index: 9999;
+
+  display: flex;        /* enable flexbox */
+  width: max-content;   /* fit content width */
+  user-select: none;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+#installPrompt:hover,
+#installPrompt:focus {
+  background: #008000;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.5);
+  outline: none;
+}
+

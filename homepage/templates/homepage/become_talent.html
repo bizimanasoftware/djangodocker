@@ -1,0 +1,78 @@
+{% extends "homepage/base.html" %}
+{% load static %}
+
+{% block title %}Become a Talent — Gloex{% endblock %}
+
+{% block content %}
+
+<!-- Hero Section: The Call to Action for Talents -->
+<section class="py-5 bg-gloex-offwhite border-bottom">
+    <div class="container text-center">
+        <h1 class="display-4 fw-bold text-gloex-green">Your Journey Starts Here.</h1>
+        <p class="lead text-gloex-text-muted mb-4">Gloex is your platform to find global sponsors, connect with a dedicated agent, and turn your passion into a profession.</p>
+        <a href="{% url 'accounts:unified_auth' %}" class="btn btn-gloex-green btn-lg">Apply to Be a Talent →</a>
+    </div>
+</section>
+
+<!-- Why Join Gloex Section -->
+<section class="container">
+    <div class="container">
+        <h2 class="text-center text-gloex-green mb-5 fw-bold">Why Join the Gloex Community?</h2>
+        <div class="row text-center g-4">
+            <div class="col-md-4">
+                <div class="p-4 bg-gloex-offwhite rounded shadow-sm h-100">
+                    <i class="fas fa-globe-americas fa-4x text-gloex-green mb-3"></i>
+                    <h4 class="text-gloex-green mb-2">Global Exposure</h4>
+                    <p class="text-gloex-text-muted">Showcase your skills to a worldwide audience of potential sponsors and supporters.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="p-4 bg-gloex-offwhite rounded shadow-sm h-100">
+                    <i class="fas fa-handshake fa-4x text-gloex-green mb-3"></i>
+                    <h4 class="text-gloex-green mb-2">Dedicated Support</h4>
+                    <p class="text-gloex-text-muted">Get matched with a verified Gloex Agent who will guide you and advocate for your success.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="p-4 bg-gloex-offwhite rounded shadow-sm h-100">
+                    <i class="fas fa-coins fa-4x text-gloex-green mb-3"></i>
+                    <h4 class="text-gloex-green mb-2">Direct Sponsorship</h4>
+                    <p class="text-gloex-text-muted">Receive funds directly through secure and transparent channels, with zero hidden fees.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- The Onboarding Process Section -->
+<section class="py-5 bg-gloex-light-gray border-top">
+    <div class="container">
+        <h2 class="text-center text-gloex-green mb-5 fw-bold">How It Works: Our Simple Process</h2>
+        <div class="row justify-content-center">
+            <div class="col-md-10">
+                <div class="list-group list-group-flush text-center">
+                    <div class="list-group-item bg-transparent d-md-flex align-items-center justify-content-center p-4">
+                        <i class="fas fa-1 fa-2x text-gloex-green me-md-3 mb-2 mb-md-0"></i>
+                        <h5 class="mb-0 fw-bold">1. Apply Online</h5>
+                        <p class="mb-0 ms-md-3 text-gloex-text-muted">Fill out our simple application form with your details and portfolio. It only takes a few minutes.</p>
+                    </div>
+                    <div class="list-group-item bg-transparent d-md-flex align-items-center justify-content-center p-4">
+                        <i class="fas fa-2 fa-2x text-gloex-green me-md-3 mb-2 mb-md-0"></i>
+                        <h5 class="mb-0 fw-bold">2. Get Verified</h5>
+                        <p class="mb-0 ms-md-3 text-gloex-text-muted">Our team, along with a local agent, verifies your profile and story to ensure authenticity.</p>
+                    </div>
+                    <div class="list-group-item bg-transparent d-md-flex align-items-center justify-content-center p-4">
+                        <i class="fas fa-3 fa-2x text-gloex-green me-md-3 mb-2 mb-md-0"></i>
+                        <h5 class="mb-0 fw-bold">3. Start Your Journey</h5>
+                        <p class="mb-0 ms-md-3 text-gloex-text-muted">Once approved, your profile goes live. You can now connect with sponsors and start receiving support.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="text-center mt-5">
+            <a href="{% url 'accounts:unified_auth' %}" class="btn btn-gloex-green btn-lg">Apply to Be a Talent →</a>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

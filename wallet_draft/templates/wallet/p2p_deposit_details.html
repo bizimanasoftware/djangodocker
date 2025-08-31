@@ -1,0 +1,57 @@
+{% extends "dashboards/base_dashboard.html" %}
+
+{% block page_title %}P2P Deposit Details{% endblock %}
+
+{% block dashboard_content %}
+<div class="card shadow-sm">
+    <div class="card-header bg-info text-white">
+        <h4 class="mb-0">P2P Deposit Details for Transaction {{ transaction.transaction_id|slice:":8" }}...</h4>
+    </div>
+    <div class="card-body">
+        <p class="card-text">Your P2P deposit request for <strong>{{ transaction.amount|floatformat:8 }} USD</strong> via <strong>{{ transaction.get_payment_method_display }}</strong> is currently:</p>
+        <p class="card-text"><strong>Status:</strong> <span class="badge bg-{% if transaction.status == 'completed' %}success{% elif transaction.status == 'pending' or transaction.status == 'review' or transaction.status == 'awaiting_admin_instructions' or transaction.status == 'awaiting_proof_of_payment' %}warning{% else %}danger{% endif %}">{{ transaction.get_status_display }}</span></p>
+
+        {% if transaction.status == 'awaiting_admin_instructions' %}
+            <div class="alert alert-warning mt-3">
+                <h5 class="alert-heading">Awaiting Admin Instructions</h5>
+                <p>Your request has been received. An admin will review it and provide specific payment instructions (e.g., bank details, mobile money number) shortly.</p>
+                <p>Please check back on your <a href="{% url 'wallet:wallet_dashboard' %}" class="alert-link">Wallet Dashboard</a> for updates.</p>
+            </div>
+        {% elif transaction.status == 'awaiting_proof_of_payment' %}
+            <div class="alert alert-success mt-3">
+                <h5 class="alert-heading">Payment Instructions from Admin:</h5>
+                <p>Please send <strong>{{ transaction.amount|floatformat:8 }} USD</strong> to the following details provided by the admin:</p>
+                <pre class="bg-light p-3 border rounded">{{ transaction.admin_payment_instructions|default:"No instructions provided yet." }}</pre>
+                
+                <p class="mt-3">Once you have made the payment, please upload a clear proof of payment (screenshot or receipt).</p>
+                <a href="{% url 'wallet:p2p_deposit_upload_proof' transaction.transaction_id %}" class="btn btn-success mt-2">
+                    <i class="fas fa-upload me-1"></i> Upload Proof of Payment
+                </a>
+            </div>
+        {% elif transaction.status == 'review' and transaction.user_proof_of_payment %}
+            <div class="alert alert-info mt-3">
+                <h5 class="alert-heading">Proof of Payment Uploaded</h5>
+                <p>Your proof of payment has been uploaded and is currently under review by an admin. We will process your deposit as soon as possible.</p>
+                <a href="{{ transaction.user_proof_of_payment.url }}" target="_blank" class="btn btn-outline-primary btn-sm mt-2">View Uploaded Proof</a>
+            </div>
+        {% elif transaction.status == 'completed' %}
+            <div class="alert alert-success mt-3">
+                <h5 class="alert-heading">Deposit Completed!</h5>
+                <p>Your P2P deposit has been successfully processed and funds added to your wallet.</p>
+            </div>
+        {% elif transaction.status == 'failed' or transaction.status == 'cancelled' %}
+            <div class="alert alert-danger mt-3">
+                <h5 class="alert-heading">Deposit {{ transaction.get_status_display }}</h5>
+                <p>There was an issue with your P2P deposit. Please contact support for assistance or initiate a new request.</p>
+                {% if transaction.admin_notes %}
+                    <p class="mt-2"><strong>Admin Notes:</strong> {{ transaction.admin_notes }}</p>
+                {% endif %}
+            </div>
+        {% endif %}
+
+        <div class="mt-4">
+            <a href="{% url 'wallet:wallet_dashboard' %}" class="btn btn-secondary">Back to Dashboard</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

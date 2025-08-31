@@ -1,0 +1,91 @@
+{% extends "homepage/base.html" %}
+{% load static %}
+
+{% block title %}{% if form.instance.pk %}Edit Post{% else %}Create New Post{% endif %}{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-md-10 mx-auto">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h3>{% if form.instance.pk %}Edit Post{% else %}Create New Post{% endif %}</h3>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        {{ form.media }} {# This is crucial for CKEditor #}
+                        
+                        <div class="mb-3">
+                            <label class="form-label">{{ form.title.label }}</label>
+                            {{ form.title }}
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">{{ form.subtitle.label }}</label>
+                            {{ form.subtitle }}
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">{{ form.category.label }}</label>
+                            {{ form.category }}
+                        </div>
+
+                        <hr>
+                        <h5 class="mt-4">Content Editor</h5>
+                        <div class="mb-3">
+                            {{ form.body }}
+                        </div>
+                        <hr>
+                        
+                        <h5 class="mt-4">Media & Attachments</h5>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">{{ form.featured_image.label }}</label>
+                                {{ form.featured_image }}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">{{ form.featured_video.label }}</label>
+                                {{ form.featured_video }}
+                            </div>
+                             <div class="col-md-4 mb-3">
+                                <label class="form-label">{{ form.attachment.label }}</label>
+                                {{ form.attachment }}
+                            </div>
+                        </div>
+                        <hr>
+
+                        <h5 class="mt-4">Styling & Publishing</h5>
+                        <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">{{ form.title_color.label }}</label>
+                                {{ form.title_color }}
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">{{ form.font_size.label }}</label>
+                                {{ form.font_size }}
+                            </div>
+                             <div class="col-md-3 mb-3 form-check pt-4">
+                                {{ form.underline_title }}
+                                <label class="form-check-label">{{ form.underline_title.label }}</label>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">{{ form.published_at.label }}</label>
+                                {{ form.published_at }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">{{ form.status.label }}</label>
+                                {{ form.status }}
+                            </div>
+                        </div>
+
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-success btn-lg">Save Post</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

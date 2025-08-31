@@ -1,0 +1,166 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Chat with {% if chat_partner %}{{ chat_partner.username }}{% else %}Group{% endif %}</h1>
+
+<div id="chat-log" style="height: 400px; overflow-y: scroll; border: 1px solid #ccc; padding: 10px;">
+    {% for message in messages %}
+    <div class="message {% if message.sender == request.user %}my-message{% else %}other-message{% endif %}">
+        <strong>{{ message.sender.username }}:</strong>
+        {% if message.message_type == 'text' %}
+            <span>{{ message.content }}</span>
+        {% elif message.message_type == 'image' %}
+            <p>{{ message.content }}</p>
+            <img src="{{ message.get_media_url }}" alt="Image" style="max-width: 200px; display: block;">
+        {% elif message.message_type == 'video' %}
+            <p>{{ message.content }}</p>
+            <video controls src="{{ message.get_media_url }}" style="max-width: 300px; display: block;"></video>
+        {% elif message.message_type == 'file' %}
+            <p>{{ message.content }}</p>
+            <a href="{{ message.get_media_url }}" download>Download File</a>
+        {% endif %}
+        <small>{{ message.timestamp|date:"H:i" }}</small>
+    </div>
+    {% endfor %}
+</div>
+
+{% if user_profile.can_send_messages %}
+    <div class="chat-input">
+        <textarea id="chat-message-input" rows="3" placeholder="Type your message..."></textarea><br>
+        <input type="file" id="chat-media-input" accept="image/*,video/*,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document">
+        <button id="chat-message-submit">Send</button>
+    </div>
+{% else %}
+    <p>You cannot send messages in this conversation.</p>
+{% endif %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    const conversationId = {{ conversation.id }};
+    const chatSocket = new WebSocket(
+        'ws://' + window.location.host +
+        '/ws/chat/' + conversationId + '/'
+    );
+
+    chatSocket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        const chatLog = document.querySelector('#chat-log');
+        const messageDiv = document.createElement('div');
+        messageDiv.classList.add('message');
+        if (data.sender_id === {{ request.user.id }}) {
+            messageDiv.classList.add('my-message');
+        } else {
+            messageDiv.classList.add('other-message');
+        }
+
+        let messageHtml = `<strong>${data.sender_username}:</strong> `;
+        if (data.message_type === 'text') {
+            messageHtml += `<span>${data.message}</span>`;
+        } else if (data.message_type === 'image') {
+            messageHtml += `<p>${data.message || ''}</p><img src="${data.media_url}" alt="Image" style="max-width: 200px; display: block;">`;
+        } else if (data.message_type === 'video') {
+            messageHtml += `<p>${data.message || ''}</p><video controls src="${data.media_url}" style="max-width: 300px; display: block;"></video>`;
+        } else if (data.message_type === 'file') {
+            messageHtml += `<p>${data.message || ''}</p><a href="${data.media_url}" download>Download File</a>`;
+        }
+        messageHtml += `<small>${new Date(data.timestamp).toLocaleTimeString()}</small>`;
+
+        messageDiv.innerHTML = messageHtml;
+        chatLog.appendChild(messageDiv);
+        chatLog.scrollTop = chatLog.scrollHeight; // Auto-scroll to bottom
+    };
+
+    chatSocket.onclose = function(e) {
+        console.error('Chat socket closed unexpectedly');
+    };
+
+    document.querySelector('#chat-message-input').focus();
+    document.querySelector('#chat-message-input').onkeyup = function(e) {
+        if (e.keyCode === 13) {  // Enter key
+            document.querySelector('#chat-message-submit').click();
+        }
+    };
+
+    document.querySelector('#chat-message-submit').onclick = async function(e) {
+        const messageInput = document.querySelector('#chat-message-input');
+        const mediaInput = document.querySelector('#chat-media-input');
+        const message = messageInput.value.trim();
+        const file = mediaInput.files[0];
+        let mediaUrl = null;
+        let messageType = 'text';
+
+        if (file) {
+            // *** Step 1: Upload file to S3 first ***
+            // This will require a separate AJAX call to a Django View/API endpoint
+            // For simplicity, I'm providing a placeholder. You'll need to implement this.
+            const formData = new FormData();
+            formData.append('file', file);
+            // If you want content along with file, add it
+            if (message) {
+                formData.append('content', message);
+            }
+
+            try {
+                // Replace with your actual media upload endpoint URL
+                const uploadResponse = await fetch('/api/upload_chat_media/', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRFToken': getCookie('csrftoken') // Get CSRF token
+                    }
+                });
+                const uploadData = await uploadResponse.json();
+                if (uploadResponse.ok) {
+                    mediaUrl = uploadData.media_url; // S3 URL returned by your backend
+                    messageType = uploadData.file_type; // 'image', 'video', 'file' from backend
+                } else {
+                    console.error('Media upload failed:', uploadData.error);
+                    alert('Media upload failed: ' + uploadData.error);
+                    return;
+                }
+            } catch (error) {
+                console.error('Error during media upload:', error);
+                alert('Error uploading media. Please try again.');
+                return;
+            }
+        }
+
+        if (message || mediaUrl) {
+            chatSocket.send(JSON.stringify({
+                'message': message,
+                'media_url': mediaUrl, // Pass S3 URL
+                'message_type': messageType,
+            }));
+            messageInput.value = '';
+            mediaInput.value = ''; // Clear file input
+            document.querySelector('#chat-log').scrollTop = document.querySelector('#chat-log').scrollHeight;
+        }
+    };
+
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                // Does this cookie string begin with the name we want?
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // Initial scroll to bottom when page loads
+    window.onload = function() {
+        const chatLog = document.querySelector('#chat-log');
+        if (chatLog) {
+            chatLog.scrollTop = chatLog.scrollHeight;
+        }
+    };
+</script>
+{% endblock %}

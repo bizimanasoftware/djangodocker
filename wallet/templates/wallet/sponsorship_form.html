@@ -1,0 +1,40 @@
+{% extends "homepage/base.html" %} <!-- Extend your base template -->
+{% load crispy_forms_tags %} <!-- Assuming you use crispy forms for styling -->
+
+{% block title %}Sponsor {{ recipient.username }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="mb-0">Sponsor {{ recipient.username }}</h2>
+                </div>
+                <div class="card-body">
+                    <p class="lead">You are about to sponsor <strong>{{ recipient.get_full_name|default:recipient.username }}</strong>. Please fill out the form below to proceed.</p>
+                    <p>After you submit this form, an administrator will review your request and provide you with payment instructions via the email you provide.</p>
+                    
+                    <hr>
+
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        
+                        {{ form|crispy }}
+
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="fas fa-heart"></i> Submit Sponsorship Request
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                <div class="card-footer text-muted">
+                    Thank you for your generosity!
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

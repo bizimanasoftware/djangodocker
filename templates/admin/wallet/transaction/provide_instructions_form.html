@@ -1,0 +1,90 @@
+{% extends 'admin/base_site.html' %}
+{% load i18n admin_urls static %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+    {% for url, name in breadcrumbs_nav %}
+        {% if url %}<a href="{{ url }}">{{ name }}</a>{% else %}{{ name }}{% endif %}
+        {% if not forloop.last %}&rsaquo;{% endif %}
+    {% endfor %}
+</div>
+{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    <h1>{{ title }}</h1>
+
+    {# Display existing transaction details #}
+    <div class="module">
+        <div class="form-row">
+            <div>
+                <label>Transaction ID:</label>
+                <p><strong>{{ transaction.transaction_id }}</strong></p>
+            </div>
+        </div>
+        <div class="form-row">
+            <div>
+                <label>User:</label>
+                <p><strong>{{ transaction.wallet.user.username }}</strong></p>
+            </div>
+        </div>
+        <div class="form-row">
+            <div>
+                <label>Amount Requested:</label>
+                <p><strong>{{ transaction.amount }} USD</strong></p>
+            </div>
+        </div>
+        <div class="form-row">
+            <div>
+                <label>Preferred Method:</label>
+                <p><strong>{{ transaction.get_payment_method_display }}</strong></p>
+            </div>
+        </div>
+        {% if transaction.payment_details %}
+        <div class="form-row">
+            <div>
+                <label>User's Provided Account Details:</label>
+                <p><strong>{{ transaction.payment_details|linebreaksbr }}</strong></p> {# Added linebreaksbr for better formatting #}
+            </div>
+        </div>
+        {% endif %}
+        <div class="form-row">
+            <div>
+                <label>Current Status:</label>
+                <p><strong>{{ transaction.get_status_display }}</strong></p>
+            </div>
+        </div>
+    </div>
+
+    {# Display messages #}
+    {% if messages %}
+        <ul class="messagelist">{% for message in messages %}<li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>{% endfor %}</ul>
+    {% endif %}
+
+    {# The form for admin input #}
+    <form action="" method="post" id="transaction_instructions_form" novalidate>
+        {% csrf_token %}
+        <fieldset class="module aligned"> {# Using fieldset and aligned for better admin styling #}
+            <h2>{% trans "Admin Input" %}</h2>
+            <div class="form-row field-admin_payment_instructions">
+                <div>
+                    <label class="required" for="id_admin_payment_instructions">Admin Payment Instructions:</label>
+                    <textarea name="instructions" id="id_admin_payment_instructions" rows="10" cols="80" class="vLargeTextField" required>{{ transaction.admin_payment_instructions|default_if_none:"" }}</textarea>
+                    <p class="help">Provide the bank account details, mobile money number, crypto address, or any other instructions where the user should send the deposit. This will be shown to the user.</p>
+                </div>
+            </div>
+            <div class="form-row field-admin_notes">
+                <div>
+                    <label for="id_admin_notes">Admin Notes (Internal):</label>
+                    <textarea name="admin_notes" id="id_admin_notes" rows="3" cols="80" class="vLargeTextField">{{ transaction.admin_notes|default_if_none:"" }}</textarea>
+                    <p class="help">Add internal notes about this action or the transaction. This is for admin reference only.</p>
+                </div>
+            </div>
+        </fieldset>
+        <div class="submit-row">
+            <input type="submit" value="{% trans 'Provide Instructions & Update Status' %}" class="default" name="_save">
+            <a href="{% url 'admin:wallet_transaction_change' transaction.pk %}" class="button">Cancel</a> {# Added a cancel button #}
+        </div>
+    </form>
+</div>
+{% endblock %}

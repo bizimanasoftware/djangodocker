@@ -1,0 +1,20 @@
+{% extends 'dashboards/base_dashboard.html' %} {# Or your main base template #}
+
+{% block title %}My Connections{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h1 class="mt-4">My Connections</h1>
+    <p>This page will show your connections.</p>
+    {# Add logic to loop through connections and display them #}
+    {% if connections %}
+        <ul>
+            {% for connection in connections %}
+                <li>{{ connection.username }}</li> {# Adjust based on how you fetch/represent connections #}
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>You don't have any connections yet.</p>
+    {% endif %}
+</div>
+{% endblock %}

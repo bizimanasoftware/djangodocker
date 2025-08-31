@@ -1,0 +1,14 @@
+{% extends "homepage/base.html" %}
+{% block content %}
+<h2>Public Profiles</h2>
+{% for profile in profiles %}
+  <div>
+    <h4>{{ profile.user.username }} ({{ profile.category }})</h4>
+    {% if profile.profile_image %}<img src="{{ profile.profile_image.url }}" width="100">{% endif %}
+    <p>{{ profile.bio }}</p>
+    {% if profile.intro_video %}<video controls width="150"><source src="{{ profile.intro_video.url }}"></video>{% endif %}
+  </div>
+{% empty %}
+  <p>No public profiles found.</p>
+{% endfor %}
+{% endblock %}

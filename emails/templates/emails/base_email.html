@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ subject }}</title>
+</head>
+<body style="font-family: Arial, sans-serif; margin: 20px; color: #333;">
+    <table width="100%" border="0" cellspacing="0" cellpadding="0">
+        <tr>
+            <td align="center">
+                <table width="600" border="0" cellspacing="0" cellpadding="20" style="border: 1px solid #ddd;">
+                    <tr>
+                        <td>
+                            <h2 style="color: #0056b3;">{{ subject }}</h2>
+                            <hr>
+                            {% block content %}{% endblock %}
+                            <hr>
+                            <p style="font-size: 12px; color: #777;">
+                                This is an automated message from gloex.org. Please do not reply directly to this email.
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

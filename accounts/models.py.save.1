@@ -1,0 +1,90 @@
+# accounts/models.py
+from django.db import models
+from django.contrib.auth.models import AbstractUser
+from django.urls import reverse # Import reverse
+
+class CustomUser(AbstractUser):
+    """
+    Extending the default User model to include a user type.
+    This is the central piece of logic for redirecting users to their
+    correct dashboards.
+    """
+
+    # We define choices for the user types. This is good practice for data integrity.
+    class UserType(models.TextChoices):
+        ARTIST = 'ARTIST', 'Artist'
+        FOOTBALLER = 'FOOTBALLER', 'Footballer'
+        AGENT = 'AGENT', 'Agent'
+        SPONSOR = 'SPONSOR', 'Sponsor'
+        EMERGENCY = 'EMERGENCY','Emergency'
+        EMPLOYER = 'EMPLOYER' , 'Employer'
+        CODER = 'CODER', 'Coder'
+
+
+
+
+
+
+
+ # Add other user types here as your project grows
+        # e.g., 'EMPLOYER', 'ADMIN', 'EMERGENCY'
+
+    # This field will store the type of user.
+    # We provide a default, but it should be set upon registration.
+    user_type = models.CharField(
+        max_length=20,
+        choices=UserType.choices,
+        default=UserType.ARTIST # A sensible default
+    )
+
+    # Add related_name to avoid clashes if AbstractUser already defines user_permissions
+    # These are often necessary when extending AbstractUser with ManyToManyFields
+    # if you have other apps or models that might also define 'groups' or 'user_permissions'.
+    groups = models.ManyToManyField(
+        'auth.Group',
+        verbose_name='groups',
+        blank=True,
+        help_text='The groups this user belongs to. A user will get all permissions granted to each of their groups.',
+        related_name="customuser_set", # Add related_name to prevent clash
+        related_query_name="user",
+    )
+    user_permissions = models.ManyToManyField(
+        'auth.Permission',
+        verbose_name='user permissions',
+        blank=True,
+        help_text='Specific permissions for this user.',
+        related_name="customuser_set", # Add related_name to prevent clash
+        related_query_name="user",
+    )
+
+    def __str__(self):
+        return self.username
+
+    def get_dashboard_url(self):
+        """
+        Returns the appropriate dashboard URL based on the user's user_type.
+        You MUST ensure that the respective app's urls.py has:
+        1. `app_name = 'your_app_name'`
+        2. A URL pattern named 'dashboard' (e.g., `path('', views.dashboard_view, name='dashboard')`)
+        """
+        if self.user_type == self.UserType.ARTIST:
+            return reverse('artists:dashboard') # Assuming 'artists' app with a 'dashboard' URL name
+        elif self.user_type == self.UserType.FOOTBALLER:
+            return reverse('footballers:dashboard') # Assuming 'footballers' app with a 'dashboard' URL name
+        elif self.user_type == self.UserType.AGENT:
+            return reverse('agents:dashboard') # Assuming 'agents' app with a 'dashboard' URL name
+        elif self.user_type == self.UserType.SPONSOR:
+            return reverse('sponsors:dashboard') # Assuming 'sponsors' app with a 'dashboard' URL name
+        elif self.user_type == self.UserType.EMERGENCY:
+            return reverse('emergencies:dashboard') #
+        elif self.user_type == self.UserType.EMPLOYER:
+            return reverse('employers:dashboard') #
+        elif self.user_type == self.UserType.CODER:
+            return reverse('coders:dashboard') #
+        # Add more conditions for other user types here
+        # Example for a general administrative dashboard, if you have one:
+        # elif self.is_staff: # Or specific user_type like 'ADMIN'
+        #     return reverse('admin:index') # Django Admin dashboard
+
+        # Fallback for any user type not explicitly handled, or a generic user profile
+        return reverse('accounts:profile') # Assuming 'accounts:profile' is a generic user profile/dashboard URL

@@ -1,0 +1,130 @@
+{% extends "homepage/base.html" %}
+{% load static %}
+
+{% block title %}Login / Register – Gloex{% endblock %}
+
+{% block content %}
+<section class="py-5 bg-light">
+  <div class="container">
+    <h2 class="text-center fw-bold mb-4 text-primary">🔐 Welcome to Gloex</h2>
+    <p class="text-center mb-5 text-muted">Connect with the global talent community — whether you're an artist, athlete, agent, or sponsor!</p>
+
+    <div class="row justify-content-center">
+      <div class="col-md-6">
+        <div class="card shadow-sm">
+          <div class="card-body">
+            <ul class="nav nav-tabs mb-3" id="authTabs" role="tablist">
+              <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="login-tab" data-bs-toggle="tab" data-bs-target="#login" type="button" role="tab">Login</button>
+              </li>
+              <li class="nav-item" role="presentation">
+                <button class="nav-link" id="register-tab" data-bs-toggle="tab" data-bs-target="#register" type="button" role="tab">Register</button>
+              </li>
+            </ul>
+
+            <div class="tab-content">
+              <!-- LOGIN TAB -->
+              <div class="tab-pane fade show active" id="login" role="tabpanel">
+                <form>
+                  <div class="mb-3">
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-control" required>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Password</label>
+                    <input type="password" class="form-control" required>
+                  </div>
+                  <div class="d-grid">
+                    <button type="submit" class="btn btn-primary">Login</button>
+                  </div>
+                  <p class="text-center mt-3">Forgot your password? <a href="#">Reset it</a></p>
+                  <hr>
+                  <p class="text-center text-muted">Or login with:</p>
+                  <div class="d-flex justify-content-center gap-3">
+                    <a href="#" class="btn btn-outline-danger btn-sm"><i class="bi bi-google"></i> Google</a>
+                    <a href="#" class="btn btn-outline-primary btn-sm"><i class="bi bi-facebook"></i> Facebook</a>
+                    <a href="#" class="btn btn-outline-dark btn-sm"><i class="bi bi-github"></i> GitHub</a>
+                  </div>
+                </form>
+              </div>
+
+              <!-- REGISTER TAB -->
+              <div class="tab-pane fade" id="register" role="tabpanel">
+                <form>
+                  <div class="mb-3">
+                    <label class="form-label">Full Name</label>
+                    <input type="text" class="form-control" required>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Email</label>
+                    <input type="email" class="form-control" required>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">Password</label>
+                    <input type="password" class="form-control" required>
+                  </div>
+
+                  <!-- Category Dropdown -->
+                  <div class="mb-3">
+                    <label class="form-label">Category</label>
+                    <select class="form-select" id="category" onchange="toggleOtherCategory(this)" required>
+                      <option disabled selected>Select your category</option>
+                      <option>Footballer</option>
+                      <option>Basketballer</option>
+                      <option>Boxer</option>
+                      <option>Artist</option>
+                      <option>Musician</option>
+                      <option>Filmmaker</option>
+                      <option>Sponsor</option>
+                      <option>Agent</option>
+                      <option value="Other">Other (specify)</option>
+                    </select>
+                  </div>
+
+                  <!-- Other Category Textbox -->
+                  <div class="mb-3" id="other-category-div" style="display: none;">
+                    <label class="form-label">Specify your category</label>
+                    <input type="text" class="form-control">
+                  </div>
+
+                  <!-- Terms & Conditions Checkbox -->
+                  <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="termsCheck" required>
+                    <label class="form-check-label" for="termsCheck">
+                      I agree to the <a href="/terms/" target="_blank">Terms and Conditions</a>
+                    </label>
+                  </div>
+
+                  <div class="d-grid">
+                    <button type="submit" class="btn btn-success">Register</button>
+                  </div>
+
+                  <hr>
+                  <p class="text-center text-muted">Or sign up with:</p>
+                  <div class="d-flex justify-content-center gap-3">
+                    <a href="#" class="btn btn-outline-danger btn-sm"><i class="bi bi-google"></i> Google</a>
+                    <a href="#" class="btn btn-outline-primary btn-sm"><i class="bi bi-facebook"></i> Facebook</a>
+                    <a href="#" class="btn btn-outline-dark btn-sm"><i class="bi bi-github"></i> GitHub</a>
+                  </div>
+                </form>
+              </div>
+            </div> <!-- End tab content -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  function toggleOtherCategory(select) {
+    const otherInput = document.getElementById("other-category-div");
+    if (select.value === "Other") {
+      otherInput.style.display = "block";
+    } else {
+      otherInput.style.display = "none";
+    }
+  }
+</script>
+
+{% endblock %}

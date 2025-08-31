@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Your Notifications</h1>
+<div class="notification-list">
+    {% for notification in notifications %}
+    <div class="notification-item {% if not notification.read %}unread{% endif %}">
+        <a href="{{ notification.link_url|default:'#' }}" {% if not notification.read %}onclick="markNotificationRead({{ notification.id }})"{% endif %}>
+            <strong>{{ notification.notification_type|title }}:</strong> {{ notification.message }}
+            <small> - {{ notification.timestamp|timesince }} ago</small>
+        </a>
+        {% if not notification.read %}
+            <button class="mark-read-btn" data-notification-id="{{ notification.id }}" style="margin-left: 10px;">Mark Read</button>
+        {% endif %}
+    </div>
+    {% empty %}
+    <p>You have no notifications.</p>
+    {% endfor %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // WebSocket for real-time notifications (e.g., in your base.html or a dedicated global script)
+    const notificationSocket = new WebSocket(
+        'ws://' + window.location.host +
+        '/ws/notifications/'
+    );
+
+    notificationSocket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        console.log('New real-time notification:', data);
+        // Example: Add to a notification dropdown or show a toast message
+        alert(`New ${data.notification_type.replace('_', ' ')} from ${data.sender_username}: ${data.message}`);
+        // You'd update a notification bell icon count here
+        // And potentially prepend to the notification list if on the notification page
+    };
+
+    notificationSocket.onclose = function(e) {
+        console.error('Notification socket closed unexpectedly');
+    };
+
+    // Function to mark notification as read via AJAX
+    function markNotificationRead(notificationId) {
+        fetch(`/notifications/mark-read/${notificationId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                // Update UI: remove 'unread' class or hide 'Mark Read' button
+                const btn = document.querySelector(`.mark-read-btn[data-notification-id="${notificationId}"]`);
+                if (btn) {
+                    btn.remove();
+                }
+                const item = btn.closest('.notification-item');
+                if (item) {
+                    item.classList.remove('unread');
+                }
+            } else {
+                console.error('Failed to mark notification as read:', data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error marking notification as read:', error);
+        });
+        return true; // Allow link to be followed
+    }
+
+    // Add event listeners for "Mark Read" buttons (if not handled by onclick in anchor tag)
+    document.querySelectorAll('.mark-read-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const notificationId = this.dataset.notificationId;
+            markNotificationRead(notificationId);
+        });
+    });
+
+    function getCookie(name) { /* ... (same as in messaging/conversation_detail.html) ... */
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+{% endblock %}

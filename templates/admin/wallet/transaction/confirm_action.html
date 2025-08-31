@@ -1,0 +1,17 @@
+{% extends 'admin/base_site.html' %}
+{% load i18n admin_urls static %}
+
+{% block content %}
+<div id="content-main">
+    <p>Are you sure you want to <strong>{{ action_name }}</strong> transaction <strong>{{ object.transaction_id }}</strong>?</p>
+    <p>This action is irreversible and may affect the user's balance and transaction history.</p>
+
+    <form action="{{ action_url }}" method="post">
+        {% csrf_token %}
+        <div class="submit-row">
+            <input type="submit" value="Yes, {{ action_name }}" class="default" name="confirm">
+            <a href="{% url 'admin:wallet_transaction_change' object.pk %}" class="button">No, take me back</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

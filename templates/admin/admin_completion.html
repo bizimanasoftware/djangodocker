@@ -1,0 +1,16 @@
+{% extends "admin/base_site.html" %}
+{% block content %}
+<form action="" method="post">
+    {% csrf_token %}
+    <h2>Complete Withdrawal</h2>
+    <p>You are about to mark the following {{ items|length }} withdrawal(s) as completed:</p>
+    <ul>
+        {% for item in items %}
+        <li>{{ item }}</li>
+        {% endfor %}
+    </ul>
+    {{ form.as_p }}
+    <input type="hidden" name="action" value="mark_withdrawal_completed">
+    <input type="submit" name="apply" value="Confirm Completion">
+</form>
+{% endblock %}

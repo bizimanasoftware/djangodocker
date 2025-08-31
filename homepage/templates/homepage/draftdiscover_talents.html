@@ -1,0 +1,145 @@
+{% extends "profiles/discover" %}
+{% load static %}
+
+{% block title %}Discover Talents — Gloex{% endblock %}
+
+{% block content %}
+
+<!-- Hero Section: Search and Filter -->
+<section class="py-5 bg-gloex-offwhite border-bottom">
+    <div class="container text-center">
+        <h1 class="display-4 fw-bold text-gloex-green">Discover Inspiring Talents</h1>
+        <p class="lead text-gloex-text-muted mb-4">Find and connect with rising stars in sports, arts, tech, and more. Use the search bar to find a specific talent or browse by category below.</p>
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <form class="d-flex" role="search">
+                    <input class="form-control form-control-lg me-2" type="search" placeholder="Search for a talent by name or skill..." aria-label="Search">
+                    <button class="btn btn-gloex-green btn-lg" type="submit">Search</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Talent Grid Section -->
+<section class="py-5 bg-white">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="text-gloex-green fw-bold mb-0">Featured Talents</h2>
+            <div class="dropdown">
+                <button class="btn btn-outline-secondary dropdown-toggle" type="button" id="sortDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                    Sort By
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="sortDropdown">
+                    <li><a class="dropdown-item" href="#">Most Recent</a></li>
+                    <li><a class="dropdown-item" href="#">Most Sponsored</a></li>
+                    <li><a class="dropdown-item" href="#">A-Z</a></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4">
+            <!-- Example Talent Card 1 -->
+            <div class="col">
+                <div class="card h-100 shadow-sm border-0 card-hover">
+                    <img src="https://placehold.co/400x300/E8EBEF/3A404F?text=Talent+Image" class="card-img-top" alt="Talent profile image">
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title fw-bold text-gloex-green">Amina S.</h5>
+                        <p class="card-text text-gloex-text-muted">Aspiring footballer from Rwanda, aiming for the national team.</p>
+                        <div class="mt-auto">
+                            <span class="badge bg-secondary mb-2">Football</span>
+                            <span class="badge bg-gloex-offwhite text-gloex-text-muted mb-2">Kigali, Rwanda</span>
+                            <a href="#" class="btn btn-outline-gloex-green btn-sm w-100 mt-2">View Profile</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Example Talent Card 2 -->
+            <div class="col">
+                <div class="card h-100 shadow-sm border-0 card-hover">
+                    <img src="https://placehold.co/400x300/E8EBEF/3A404F?text=Talent+Image" class="card-img-top" alt="Talent profile image">
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title fw-bold text-gloex-green">Kwame O.</h5>
+                        <p class="card-text text-gloex-text-muted">A vibrant singer and songwriter from Ghana, creating Afrobeat fusion.</p>
+                        <div class="mt-auto">
+                            <span class="badge bg-secondary mb-2">Music & Arts</span>
+                            <span class="badge bg-gloex-offwhite text-gloex-text-muted mb-2">Accra, Ghana</span>
+                            <a href="#" class="btn btn-outline-gloex-green btn-sm w-100 mt-2">View Profile</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Example Talent Card 3 -->
+            <div class="col">
+                <div class="card h-100 shadow-sm border-0 card-hover">
+                    <img src="https://placehold.co/400x300/E8EBEF/3A404F?text=Talent+Image" class="card-img-top" alt="Talent profile image">
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title fw-bold text-gloex-green">Jane M.</h5>
+                        <p class="card-text text-gloex-text-muted">A talented web developer from Kenya building solutions for her community.</p>
+                        <div class="mt-auto">
+                            <span class="badge bg-secondary mb-2">Tech & Innovation</span>
+                            <span class="badge bg-gloex-offwhite text-gloex-text-muted mb-2">Nairobi, Kenya</span>
+                            <a href="#" class="btn btn-outline-gloex-green btn-sm w-100 mt-2">View Profile</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Example Talent Card 4 -->
+            <div class="col">
+                <div class="card h-100 shadow-sm border-0 card-hover">
+                    <img src="https://placehold.co/400x300/E8EBEF/3A404F?text=Talent+Image" class="card-img-top" alt="Talent profile image">
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title fw-bold text-gloex-green">Maria C.</h5>
+                        <p class="card-text text-gloex-text-muted">An emerging artist from Brazil, specializing in expressive street art.</p>
+                        <div class="mt-auto">
+                            <span class="badge bg-secondary mb-2">Creatives</span>
+                            <span class="badge bg-gloex-offwhite text-gloex-text-muted mb-2">Rio de Janeiro, Brazil</span>
+                            <a href="#" class="btn btn-outline-gloex-green btn-sm w-100 mt-2">View Profile</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Additional Talent Cards... -->
+            <div class="col">
+                <div class="card h-100 shadow-sm border-0 card-hover">
+                    <img src="https://placehold.co/400x300/E8EBEF/3A404F?text=Talent+Image" class="card-img-top" alt="Talent profile image">
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title fw-bold text-gloex-green">Yusuf A.</h5>
+                        <p class="card-text text-gloex-text-muted">A dedicated student from Nigeria seeking support for university tuition.</p>
+                        <div class="mt-auto">
+                            <span class="badge bg-secondary mb-2">Students</span>
+                            <span class="badge bg-gloex-offwhite text-gloex-text-muted mb-2">Lagos, Nigeria</span>
+                            <a href="#" class="btn btn-outline-gloex-green btn-sm w-100 mt-2">View Profile</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col">
+                <div class="card h-100 shadow-sm border-0 card-hover">
+                    <img src="https://placehold.co/400x300/E8EBEF/3A404F?text=Talent+Image" class="card-img-top" alt="Talent profile image">
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title fw-bold text-gloex-green">Chika T.</h5>
+                        <p class="card-text text-gloex-text-muted">A Japanese artist aiming to fund a global exhibition of her work.</p>
+                        <div class="mt-auto">
+                            <span class="badge bg-secondary mb-2">Creatives</span>
+                            <span class="badge bg-gloex-offwhite text-gloex-text-muted mb-2">Tokyo, Japan</span>
+                            <a href="#" class="btn btn-outline-gloex-green btn-sm w-100 mt-2">View Profile</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="text-center mt-5">
+            <a href="#" class="btn btn-gloex-green btn-lg">Load More Talents →</a>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

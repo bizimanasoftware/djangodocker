@@ -1,0 +1,44 @@
+{% extends "dashboards/base_dashboard.html" %} {# Adjust your base template path here #}
+{% load static %}
+{% load crispy_forms_tags %} {# Optional: Requires django-crispy-forms for nicer rendering #}
+
+{% block title %}Contact Us{% endblock %}
+
+{% block dashboard_content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-primary text-white text-center">
+                    <h5 class="mb-0"><i class="fas fa-envelope me-2"></i> Contact Us</h5>
+                </div>
+                <div class="card-body">
+                    {# Display Django messages (success/error) #}
+                    {% if messages %}
+                        <div class="mb-3">
+                            {% for message in messages %}
+                                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                    {{ message }}
+                                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    <form method="post" novalidate> {# novalidate prevents browser's default HTML5 validation #}
+                        {% csrf_token %}
+
+                        {# Render form fields. Using crispy forms for quick styling #}
+                        {# If you don't use crispy forms, you'll need to render them manually like {{ form.as_p }} or field-by-field #}
+                        {{ form|crispy }}
+
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">Send Message</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

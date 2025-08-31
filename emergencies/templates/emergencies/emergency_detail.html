@@ -1,0 +1,143 @@
+{% extends "homepage/base.html" %}
+{% load static %}
+
+{% block title %}{{ campaign.title }}{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body p-md-4">
+                    {% if campaign.main_image %}
+                        <img src="{{ campaign.main_image.url }}" class="img-fluid rounded mb-4" alt="Main image for {{ campaign.title }}">
+                    {% endif %}
+                    
+                    <h1 class="card-title mb-3">{{ campaign.title }}</h1>
+                    
+                    <div class="d-flex justify-content-between text-muted mb-3 flex-wrap">
+                        <span><i class="fas fa-user me-1"></i>By: {{ campaign.creator.username }}</span>
+                        <span><i class="fas fa-hand-holding-heart me-1"></i>Beneficiary: {{ campaign.recipient.username }}</span>
+                        {% if campaign.city and campaign.country %}
+                        <span><i class="fas fa-map-marker-alt me-1"></i>{{ campaign.city }}, {{ campaign.country }}</span>
+                        {% endif %}
+                    </div>
+
+                    <p class="lead">{{ campaign.description|linebreaks }}</p>
+
+                    {% if gallery_images %}
+                    <hr class="my-4">
+                    <h4 class="mb-3">Gallery</h4>
+                    <div class="row g-2">
+                        {% for item in gallery_images %}
+                        <div class="col-md-4 col-6">
+                            <a href="{{ item.image.url }}" target="_blank">
+                                <img src="{{ item.image.url }}" class="img-fluid rounded" alt="{{ item.caption|default:'Campaign image' }}">
+                            </a>
+                            {% if item.caption %}
+                                <p class="text-muted text-center mt-1"><small>{{ item.caption }}</small></p>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <hr class="my-4">
+
+                    {% if campaign.show_progress_bar %}
+                    <h4 class="mb-3">Fundraising Progress</h4>
+                    <div class="progress-info d-flex justify-content-between mb-2">
+                        <span class="fw-bold">Received: ${{ campaign.current_amount|floatformat:2 }}</span>
+                        <span class="text-muted">Goal: ${{ campaign.goal_amount|floatformat:2 }}</span>
+                    </div>
+                    <div class="progress" style="height: 30px;">
+                        <div class="progress-bar bg-success progress-bar-striped progress-bar-animated" role="progressbar" style="width: {{ campaign.progress_percentage }}%;" aria-valuenow="{{ campaign.progress_percentage }}">
+                            <strong>{{ campaign.progress_percentage|floatformat:2 }}%</strong>
+                        </div>
+                    </div>
+                    <div class="text-center mt-2">
+                        <small class="text-muted">Ends on: {{ campaign.end_date|date:"F d, Y" }}</small>
+                    </div>
+                    <hr class="my-4">
+                    {% endif %}
+
+                    <h4 class="mb-3">Comments ({{ comments.count }})</h4>
+                    <div class="mb-4">
+                        {% for comment in comments %}
+                        <div class="d-flex mb-3">
+                            <div class="flex-shrink-0"><i class="fas fa-user-circle fa-2x text-muted"></i></div>
+                            <div class="ms-3">
+                                <div class="fw-bold">{{ comment.author.username }} <small class="text-muted ms-2">{{ comment.timestamp|timesince }} ago</small></div>
+                                {{ comment.text|linebreaksbr }}
+                            </div>
+                        </div>
+                        {% empty %}
+                        <p class="text-muted">No comments yet. Be the first to share your thoughts!</p>
+                        {% endfor %}
+                    </div>
+
+                    {% if user.is_authenticated %}
+                    <form method="POST" action="{% url 'emergencies:add_comment' slug=campaign.slug %}">
+                        {% csrf_token %}
+                        {{ comment_form.as_p }}
+                        <button type="submit" class="btn btn-secondary btn-sm">Post Comment</button>
+                    </form>
+                    {% else %}
+                    <p><a href="{% url 'accounts:unified_auth' %}">Log in</a> to post a comment.</p>
+                    {% endif %}
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0">Contact Campaign Creator</h4>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }}" role="alert">{{ message }}</div>
+                        {% endfor %}
+                    {% endif %}
+                    <form method="POST" action="{% url 'emergencies:process_sponsor_message' slug=campaign.slug %}">
+                        {% csrf_token %}
+                        {{ contact_form.as_p }}
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-success">Send Message</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-header">
+                    <h4 class="mb-0">How to Support</h4>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">Contact the creator directly or use one of the methods below to send support.</p>
+                    {% for method in payment_methods %}
+                    <div class="mb-3 p-3 border rounded">
+                        <h5 class="fw-bold">{{ method.get_method_type_display }}</h5>
+                        <ul class="list-unstyled mb-0">
+                            {% if method.account_holder_name %}<li><strong>Name:</strong> {{ method.account_holder_name }}</li>{% endif %}
+                            {% if method.phone_number %}<li><strong>Phone:</strong> {{ method.phone_number }}</li>{% endif %}
+                            {% if method.email_address %}<li><strong>Email:</strong> {{ method.email_address }}</li>{% endif %}
+                            {% if method.bank_name %}<li><strong>Bank:</strong> {{ method.bank_name }}</li>{% endif %}
+                            {% if method.account_number %}<li><strong>Account/IBAN:</strong> {{ method.account_number }}</li>{% endif %}
+                            {% if method.swift_bic %}<li><strong>SWIFT/BIC:</strong> {{ method.swift_bic }}</li>{% endif %}
+                            {% if method.crypto_coin %}<li><strong>Coin:</strong> {{ method.get_crypto_coin_display }}</li>{% endif %}
+                            {% if method.wallet_address %}<li style="word-wrap: break-word;"><strong>Address:</strong> {{ method.wallet_address }}</li>{% endif %}
+                            {% if method.instructions %}<li><small class="text-muted"><em>{{ method.instructions|linebreaksbr }}</em></small></li>{% endif %}
+                        </ul>
+                    </div>
+                    {% empty %}
+                    <p>The campaign creator has not added any direct support methods yet. Please use the contact form to connect with them.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

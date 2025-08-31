@@ -1,0 +1,94 @@
+{% load static %}
+<nav class="navbar navbar-expand-lg navbar-light bg-pure-green shadow-sm fixed-top" style="backdrop-filter: saturate(180%) blur(12px);">
+    <div class="container">
+        <!-- Logo and Brand Name -->
+        <a class="navbar-brand fw-bold fs-3" href="{% url 'homepage:index' %}">
+            <img src="{% static 'homepage/images/1-1.png' %}" alt="Gloex.org Logo" width="80" height="80" >
+        </a>
+        <!-- Navbar Toggler for Mobile -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
+            aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse justify-content-end" id="navbarContent">
+            <ul class="navbar-nav align-items-center mb-2 mb-lg-0">
+                <!-- Home Link -->
+                <li class="nav-item">
+                    <a class="nav-link px-3" href="{% url 'homepage:index' %}">Home</a>
+                </li>
+
+                <!-- Profiles Dropdown -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link px-3 dropdown-toggle" href="#" id="profilesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Profiles
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profilesDropdown">
+                        <li><a class="dropdown-item" href="{% url 'profiles:discover_profiles' %}">Discover Talents</a></li>
+                        <li><a class="dropdown-item" href="{% url 'profiles:discover_profiles'%} ">Public profiles</a></li>
+                        <li><a class="dropdown-item" href="{% url 'accounts:unified_auth' %}">Hiden Profiles</a></li>
+                    </ul>
+                </li>
+                
+                <!-- Services Dropdown -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link px-3 dropdown-toggle" href="#" id="servicesDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Services
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="servicesDropdown">
+                        <li><a class="dropdown-item" href="{% url 'homepage:become_talent' %}">Become a Talent</a></li>
+                        <li><a class="dropdown-item" href="{% url 'homepage:become_agent' %}">Become an Agent</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="{% url 'homepage:sponsor_donate' %}">Sponsorship & Donations</a></li>
+                        <li><a class="dropdown-item" href="{% url 'profiles:discover_profiles' %}">Discover Talent</a></li>
+                        <li><a class="dropdown-item" href="{% url 'accounts:unified_auth' %}">Partner With Us</a></li>
+                        <li><a class="dropdown-item" href="{% url 'updates:post_list' %}">Newsfeed</a></li>
+                    </ul>
+                </li>
+
+                <!-- Emergency Aid Dropdown -->
+                <li class="nav-item dropdown">
+                    <a class="nav-link px-3 dropdown-toggle" href="#" id="emergencyAidDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        Emergency Aid
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="emergencyAidDropdown">
+                        <li><a class="dropdown-item" href="{% url 'accounts:unified_auth' %}">Aid Requests</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="{% url 'emergencies:campaign_list' %}">Donate to Urgencies</a></li>
+                    </ul>
+                </li>
+
+                <!-- Conditional Authentication Links as a dropdown -->
+                {% if request.user.is_authenticated %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link px-3 dropdown-toggle btn btn-outline-custom rounded-pill px-4 py-2" href="#" id="accountDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Account
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="accountDropdown">
+                            <li><a class="dropdown-item" href="{{ request.user.get_dashboard_url }}">Dashboard</a></li>
+                            <li><a class="dropdown-item" href="{% url 'accounts:logout' %}">Logout</a></li>
+                        </ul>
+                    </li>
+                {% else %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link px-3 dropdown-toggle btn btn-outline-custom rounded-pill px-4 py-2" href="#" id="authDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Login / Register
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="authDropdown">
+                            <li><a class="dropdown-item" href="{% url 'accounts:unified_auth' %}">Login/Register</a></li>
+                        </ul>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+
+<div class="floating-logo-container">
+    <img
+        src="https://placehold.co/144x144/1C6E8C/FFFFFF?text=Gloex.org"
+        alt="Gloex.org logo"
+        class="floating-logo"
+        onerror="this.onerror=null; this.src='https://placehold.co/144x144/1C6E8C/FFFFFF?text=Gloex.org';"
+    />
+</div>
+</nav>

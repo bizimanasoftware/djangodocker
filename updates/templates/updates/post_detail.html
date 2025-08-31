@@ -1,0 +1,93 @@
+{% extends "homepage/base.html" %}
+{% load static %}
+
+{% block title %}{{ post.title }}{% endblock %}
+
+{% block content %}
+<style>
+    .post-title {
+        color: {{ post.title_color }};
+        font-size: {{ post.font_size }}px;
+        text-decoration: {% if post.underline_title %}underline{% else %}none{% endif %};
+    }
+</style>
+
+<div class="container my-5">
+    <div class="row">
+        <div class="col-lg-9 mx-auto">
+            <article>
+                <header class="mb-4">
+                    <h1 class="fw-bolder mb-1 post-title">{{ post.title }}</h1>
+                    {% if post.subtitle %}
+                        <h3 class="text-muted fst-italic">{{ post.subtitle }}</h3>
+                    {% endif %}
+                    <div class="text-muted fst-italic mb-2">
+                        Posted on {{ post.published_at|date:"F d, Y" }} by {{ post.author.username }} in <a href="{% url 'updates:post_list_by_category' post.category.slug %}">{{ post.category.name }}</a>
+                    </div>
+                </header>
+
+                {% if post.featured_image %}
+                <figure class="mb-4">
+                    <img class="img-fluid rounded" src="{{ post.featured_image.url }}" alt="{{ post.title }}">
+                </figure>
+                {% endif %}
+
+                <section class="mb-5">
+                    {{ post.body|safe }}
+                </section>
+
+                {% if post.gallery_images.all %}
+                <hr class="my-5">
+                <h3 class="mb-3">Gallery</h3>
+                <div class="row g-3">
+                    {% for item in post.gallery_images.all %}
+                    <div class="col-md-4">
+                        <a href="{{ item.image.url }}" data-bs-toggle="modal" data-bs-target="#imageModal{{ forloop.counter }}">
+                           <img src="{{ item.image.url }}" alt="{{ item.caption|default:'Gallery image' }}" class="img-fluid rounded shadow-sm">
+                        </a>
+                        {% if item.caption %}
+                            <p class="text-center text-muted small mt-1">{{ item.caption }}</p>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                
+                {% if post.featured_video %}
+                <hr class="my-5">
+                <figure class="mb-4">
+                    <video class="img-fluid rounded" controls>
+                        <source src="{{ post.featured_video.url }}" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                </figure>
+                {% endif %}
+                
+                {% if post.attachment %}
+                <hr class="my-5">
+                <div class="card bg-light p-3">
+                    <h5>Attachment</h5>
+                    <p>
+                        <a href="{{ post.attachment.url }}" class="btn btn-success" download>
+                            <i class="fas fa-download"></i> Download Attached File
+                        </a>
+                    </p>
+                </div>
+                {% endif %}
+            </article>
+        </div>
+    </div>
+</div>
+
+{% for item in post.gallery_images.all %}
+<div class="modal fade" id="imageModal{{ forloop.counter }}" tabindex="-1">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-body p-0">
+        <img src="{{ item.image.url }}" class="img-fluid">
+      </div>
+    </div>
+  </div>
+</div>
+{% endfor %}
+{% endblock %}

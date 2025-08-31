@@ -1,0 +1,79 @@
+{% extends "homepage/base.html" %}
+{% load static %}
+
+{% block title %}Emergency Aid — Gloex{% endblock %}
+
+{% block content %}
+
+<!-- Hero Section: Urgent Needs Header -->
+<section class="py-5 bg-danger-light border-bottom">
+    <div class="container text-center">
+        <h1 class="display-4 fw-bold text-danger">Urgent Needs & Emergency Aid</h1>
+        <p class="lead text-gloex-text-muted mb-4">Provide direct, immediate support to individuals and families facing unforeseen crises. Your contribution provides vital relief and hope in their time of need.</p>
+        <a href="{% url 'wallet:donate' %}" class="btn btn-danger btn-lg">Donate Now to a General Fund</a>
+    </div>
+</section>
+
+<!-- Aid Causes Grid -->
+<section class="py-5 bg-white">
+    <div class="container">
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            <!-- Emergency Aid Card 1 -->
+            <div class="col">
+                <div class="card h-100 shadow-sm border-danger card-hover">
+                    <img src="https://placehold.co/600x400/E8EBEF/3A404F?text=Aid+Image" class="card-img-top" alt="Image of a cause">
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title fw-bold text-danger">Medical Bill for Yusuf's Family</h5>
+                        <p class="card-text text-gloex-text-muted">Yusuf's family is seeking urgent funds to cover unexpected medical costs for his son's treatment.</p>
+                        <div class="mt-auto">
+                            <div class="progress mb-2" style="height: 20px;">
+                                <div class="progress-bar bg-danger" role="progressbar" style="width: 75%;" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">75%</div>
+                            </div>
+                            <p class="text-small text-gloex-text-muted mb-2"><strong>$750 raised</strong> of $1,000 goal</p>
+                            <a href="{% url 'wallet:donate' %}" class="btn btn-danger w-100 mt-2">Donate Now</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Emergency Aid Card 2 -->
+            <div class="col">
+                <div class="card h-100 shadow-sm border-danger card-hover">
+                    <img src="https://placehold.co/600x400/E8EBEF/3A404F?text=Aid+Image" class="card-img-top" alt="Image of a cause">
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title fw-bold text-danger">Rebuild Family Home after Floods</h5>
+                        <p class="card-text text-gloex-text-muted">A family in rural Kenya lost their home due to recent flooding and needs support to rebuild their lives.</p>
+                        <div class="mt-auto">
+                            <div class="progress mb-2" style="height: 20px;">
+                                <div class="progress-bar bg-danger" role="progressbar" style="width: 40%;" aria-valuenow="40" aria-valuemin="0" aria-valuemax="100">40%</div>
+                            </div>
+                            <p class="text-small text-gloex-text-muted mb-2"><strong>$2,000 raised</strong> of $5,000 goal</p>
+                            <a href="{% url 'wallet:donate' %}" class="btn btn-danger w-100 mt-2">Donate Now</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Emergency Aid Card 3 -->
+            <div class="col">
+                <div class="card h-100 shadow-sm border-danger card-hover">
+                    <img src="https://placehold.co/600x400/E8EBEF/3A404F?text=Aid+Image" class="card-img-top" alt="Image of a cause">
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title fw-bold text-danger">Scholarship for Child Refugee</h5>
+                        <p class="card-text text-gloex-text-muted">Support a child refugee's education by covering their school fees and essential supplies for one year.</p>
+                        <div class="mt-auto">
+                            <div class="progress mb-2" style="height: 20px;">
+                                <div class="progress-bar bg-danger" role="progressbar" style="width: 90%;" aria-valuenow="90" aria-valuemin="0" aria-valuemax="100">90%</div>
+                            </div>
+                            <p class="text-small text-gloex-text-muted mb-2"><strong>$900 raised</strong> of $1,000 goal</p>
+                            <a href="{% url 'wallet:donate' %}" class="btn btn-danger w-100 mt-2">Donate Now</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+</section>
+
+{% endblock %}

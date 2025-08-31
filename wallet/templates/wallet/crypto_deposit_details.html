@@ -1,0 +1,29 @@
+{% extends "dashboards/base_dashboard.html" %}
+
+{% block page_title %}Crypto Deposit Details{% endblock %}
+
+{% block dashboard_content %}
+<div class="card shadow-sm">
+    <div class="card-header bg-primary text-white">
+        <h4 class="mb-0">Crypto Deposit Details</h4>
+    </div>
+    <div class="card-body">
+        <p class="card-text">Please send your funds to the address below to complete your deposit.</p>
+
+        <div class="mb-3">
+            <strong>Payment ID:</strong> {{ nowpayments_data.payment_id }}<br>
+            <strong>Amount to Send:</strong> {{ nowpayments_data.pay_amount }} {{ nowpayments_data.pay_currency|upper }}<br>
+            <strong>Deposit Address:</strong> <code class="text-break">{{ nowpayments_data.pay_address }}</code><br>
+            {% if nowpayments_data.invoice_url %}
+            <strong>Invoice URL:</strong> <a href="{{ nowpayments_data.invoice_url }}" target="_blank" class="text-break">{{ nowpayments_data.invoice_url }}</a>
+            {% endif %}
+        </div>
+
+        <p class="alert alert-warning">
+            <strong>Important:</strong> Only send {{ nowpayments_data.pay_currency|upper }} to this address. Sending any other cryptocurrency may result in loss of funds.
+        </p>
+
+        <a href="{% url 'wallet:wallet_dashboard' %}" class="btn btn-secondary mt-3">Back to Dashboard</a>
+    </div>
+</div>
+{% endblock %}

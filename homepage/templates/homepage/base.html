@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>{% block title %}Gloex.org — Empower talent. Connect. Sponsor. GoBorderless.{% endblock %}</title>
+    
+    <meta name="description" content="{% block meta_description %}Gloex.org is an all-in-one platform to empower global talent. Connect with professionals, find sponsors, and discover borderless opportunities.{% endblock %}">
+    
+    <link rel="canonical" href="https://gloex.org{{ request.path }}">
+
+    <!-- Open Graph -->
+    <meta property="og:title" content="{% block og_title %}Gloex.org — Empower talent. Connect. Sponsor. GoBorderless.{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}Gloex.org is an all-in-one platform to empower global talent. Connect with professionals, find sponsors, and discover borderless opportunities.{% endblock %}">
+    <meta property="og:image" content="https://gloex.org{% static 'homepage/images/gloex-og-image.png' %}">
+    <meta property="og:url" content="https://gloex.org{{ request.path }}">
+    <meta property="og:site_name" content="Gloex.org">
+    <meta property="og:type" content="website">
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{% block twitter_title %}Gloex.org — Empower talent. Connect. Sponsor. GoBorderless.{% endblock %}">
+    <meta name="twitter:description" content="{% block twitter_description %}Gloex.org is an all-in-one platform to empower global talent. Connect with professionals, find sponsors, and discover borderless opportunities.{% endblock %}">
+    <meta name="twitter:image" content="https://gloex.org{% static 'homepage/images/gloex-og-image.png' %}">
+
+    <!-- Favicons -->
+    <link rel="icon" type="image/png" sizes="96x96" href="{% static 'homepage/images/favicon-96x96.png' %}">
+    <link rel="icon" type="image/svg+xml" href="{% static 'homepage/images/favicon.svg' %}">
+    <link rel="shortcut icon" href="{% static 'homepage/images/favicon.ico' %}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{% static 'homepage/images/apple-touch-icon.png' %}">
+    
+    <meta name="theme-color" content="#008000">
+
+    <!-- Manifest -->
+    <link rel="manifest" href="{% static 'manifest.json' %}?v={% now 'U' %}">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN" crossorigin="anonymous">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+    <!-- Your Custom CSS -->
+    <link rel="stylesheet" href="{% static 'homepage/css/style.css' %}?v=2025">
+
+    <!-- Structured Data for SEO -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Gloex.org",
+        "url": "https://gloex.org/",
+        "logo": "https://gloex.org{% static 'homepage/images/logo.png' %}",
+        "description": "Gloex.org is an all-in-one platform to empower global talent. Connect with professionals, find sponsors, and discover borderless opportunities.",
+        "sameAs": [
+            "https://twitter.com/gloexorg",
+            "https://www.facebook.com/gloexorg",
+            "https://www.linkedin.com/company/gloexorg"
+        ]
+    }
+    </script>
+
+    {% block extra_head %}{% endblock %}
+
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register("{% static 'js/service-worker.js' %}")
+                    .then(reg => console.log("Service Worker registered:", reg.scope))
+                    .catch(err => console.error("Service Worker registration failed:", err));
+            });
+        }
+    </script>
+</head>
+
+
+<body>
+    <button id="listenButton">🎧 Listen</button>
+    <audio id="myAudio" src="{% static 'homepage/audios/background.mp3' %}"></audio>
+
+    <div id="preloader">
+        <img src="{% static 'homepage/images/1-1.png' %}" alt="Gloex.org Logo" class="preloader-logo">
+    </div>
+
+    {% include 'homepage/partials/header.html' %}
+
+    <main class="container mt-5 pt-5" background="#008000">
+        {% if messages %}
+            <div class="message-container mb-3">
+                {% for message in messages %}
+                    <div class="alert alert-dismissible fade show {% if message.tags %}alert-{{ message.tags }}{% else %}alert-info{% endif %}" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    {% include 'homepage/partials/footer.html' %}
+
+    <a href="{% url 'wallet:donate' %}" class="floating-donate-button">
+        SUPPORT GLOEX
+    </a>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" xintegrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
+    <script src="{% static 'homepage/js/script.js' %}"></script>
+
+    {% block extra_js %}{% endblock %}
+
+    <script>
+      console.log("Preloader script is running.");
+      window.addEventListener('load', function () {
+        console.log("Page has loaded. Hiding preloader.");
+        var preloader = document.getElementById('preloader');
+        if (preloader) {
+          preloader.style.display = 'none';
+        }
+      });
+    </script>
+
+</body>
+</html>

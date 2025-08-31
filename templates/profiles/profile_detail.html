@@ -1,0 +1,85 @@
+{% extends 'homepage/base.html' %}
+{% load static %}
+
+{% block title %}{{ profile.user.get_full_name|default:profile.user.username }}'s Profile | Gloex{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row">
+    <div class="col-lg-4 text-center mb-4">
+      <img src="{% if profile.profile_picture %}{{ profile.profile_picture.url }}{% else %}{% static 'images/default_avatar.png' %}{% endif %}" class="img-fluid rounded-circle border border-3 mb-3" style="width: 200px; height: 200px; object-fit: cover;" alt="{{ profile.user.get_full_name|default:profile.user.username }}">
+      <h2 class="fw-bold">{{ profile.user.get_full_name|default:profile.user.username }}</h2>
+      {% if profile.headline %}<p class="lead text-muted fst-italic">"{{ profile.headline }}"</p>{% endif %}
+      <p><span class="badge bg-success fs-6">{{ profile.category }}</span></p>
+      {% if profile.city and profile.country %}<p class="text-muted"><i class="fas fa-map-marker-alt"></i> {{ profile.city }}, {{ profile.country }}</p>{% endif %}
+      
+      <div class="d-flex justify-content-center flex-wrap mt-3">
+        {% if profile.contact_email %}<a href="mailto:{{ profile.contact_email }}" class="btn btn-outline-secondary btn-sm m-1" title="Email"><i class="fas fa-envelope"></i></a>{% endif %}
+        {% if profile.website_url %}<a href="{{ profile.website_url }}" target="_blank" class="btn btn-outline-secondary btn-sm m-1" title="Website"><i class="fas fa-link"></i></a>{% endif %}
+        {% if profile.facebook_url %}<a href="{{ profile.facebook_url }}" target="_blank" class="btn btn-outline-secondary btn-sm m-1" title="Facebook"><i class="fab fa-facebook"></i></a>{% endif %}
+        {% if profile.twitter_url %}<a href="{{ profile.twitter_url }}" target="_blank" class="btn btn-outline-secondary btn-sm m-1" title="Twitter/X"><i class="fab fa-twitter"></i></a>{% endif %}
+        {% if profile.linkedin_url %}<a href="{{ profile.linkedin_url }}" target="_blank" class="btn btn-outline-secondary btn-sm m-1" title="LinkedIn"><i class="fab fa-linkedin"></i></a>{% endif %}
+        {% if profile.instagram_url %}<a href="{{ profile.instagram_url }}" target="_blank" class="btn btn-outline-secondary btn-sm m-1" title="Instagram"><i class="fab fa-instagram"></i></a>{% endif %}
+      </div>
+    </div>
+
+    <div class="col-lg-8">
+      <div class="card shadow-sm p-4">
+        <h4>About</h4>
+        <p style="white-space: pre-wrap;">{{ profile.bio|linebreaks }}</p>
+        
+        {% if profile.profile_video %}<div class="my-4"><video class="w-100 rounded shadow-sm" controls><source src="{{ profile.profile_video.url }}" type="video/mp4"></video></div>{% endif %}
+
+        {% if profile.user != request.user %}
+        <div class="mt-4">
+            <a href="{% url 'wallet:create_sponsorship_deposit' recipient_username=profile.user.username %}" class="btn btn-success me-2"><i class="fas fa-hand-holding-usd"></i> Sponsor</a>
+            <a href="{% url 'profiles:sponsorship_request' profile.pk 'connect' %}" class="btn btn-outline-primary me-2"><i class="fas fa-user-friends"></i> Connect</a>
+            <a href="{% url 'profiles:sponsorship_request' profile.pk 'hire' %}" class="btn btn-outline-dark"><i class="fas fa-briefcase"></i> Hire</a>
+        </div>
+        {% endif %}
+
+        {% if profile.payment_links.all or profile.crypto_wallets.all %}
+        <div class="mt-4 p-3 bg-light rounded">
+            <h5 class="mb-3">Direct Payment & Crypto</h5>
+            <div class="alert alert-warning small" role="alert"><i class="fas fa-exclamation-triangle"></i> <strong>Important:</strong> All transactions are peer-to-peer. This platform is not responsible for financial exchanges.</div>
+            <ul class="list-group list-group-flush">
+              {% for link in profile.payment_links.all %}
+              <li class="list-group-item d-flex justify-content-between align-items-center bg-light"><strong>{{ link.get_payment_type_display }}:</strong> <span>{{ link.details }}</span></li>
+              {% endfor %}
+              {% for wallet in profile.crypto_wallets.all %}
+              <li class="list-group-item bg-light"><strong>{{ wallet.get_crypto_type_display }}:</strong><input type="text" value="{{ wallet.address }}" class="form-control form-control-sm mt-1" readonly></li>
+              {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  <div class="mt-5">
+    <h3 class="text-center mb-3">Public Comments / Endorsements</h3>
+    {% if messages %}{% for message in messages %}<div class="alert alert-info">{{ message }}</div>{% endfor %}{% endif %}
+    <form action="{% url 'profiles:add_comment' profile.pk %}" method="post" class="mb-4 card card-body">
+      {% csrf_token %}
+      {{ comment_form.as_p }}
+      <button type="submit" class="btn btn-primary">Post Comment</button>
+    </form>
+    
+    {% for comment in comments %}
+    <div class="card mb-3">
+      <div class="card-body">
+        <div class="d-flex justify-content-between">
+          <div><strong>{{ comment.name }}</strong> <small class="text-muted ms-2">{{ comment.created_at|timesince }} ago</small></div>
+          {% if request.user.is_authenticated and request.user.is_superuser %}
+          <form action="{% url 'profiles:delete_comment' comment.id %}" method="post" onsubmit="return confirm('Delete this comment permanently?');">{% csrf_token %}<button type="submit" class="btn-close" title="Delete Comment"></button></form>
+          {% endif %}
+        </div>
+        <p class="card-text mt-1">{{ comment.comment|linebreaksbr }}</p>
+      </div>
+    </div>
+    {% empty %}
+    <p class="text-muted text-center">No approved comments yet. Be the first to leave one!</p>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

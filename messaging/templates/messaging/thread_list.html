@@ -1,0 +1,43 @@
+{% extends 'dashboards/base_dashboard.html' %}
+{% load static %}
+
+{% block page_title %}Messages{% endblock %}
+
+{% block dashboard_content %}
+<div class="row">
+    <div class="col-12">
+        <div class="page-title-box">
+            <h4 class="page-title">Messages</h4>
+        </div>
+    </div>
+</div>
+<div class="row">
+    <div class="col-12">
+        <div class="card mb-4">
+            <div class="card-body">
+                <h4 class="mt-0 header-title">Conversations</h4>
+                <p class="text-muted mb-3">Select a conversation to view messages.</p>
+
+                <div class="list-group">
+                    {% for thread in threads %}
+                        <a href="{% url 'messaging:thread_detail' thread.id %}" class="list-group-item list-group-item-action flex-column align-items-start">
+                            <div class="d-flex w-100 justify-content-between">
+                                <h5 class="mb-1">
+                                    {% if thread.participant1 == request.user %}
+                                        {{ thread.participant2.username }}
+                                    {% else %}
+                                        {{ thread.participant1.username }}
+                                    {% endif %}
+                                </h5>
+                                <small>{{ thread.updated|timesince }} ago</small>
+                            </div>
+                        </a>
+                    {% empty %}
+                        <p class="text-muted">You have no conversations yet.</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

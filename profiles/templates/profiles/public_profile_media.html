@@ -1,0 +1,82 @@
+{% extends "dashboards/base_dashboard.html" %}
+
+{% block content %}
+<h1>Upload Public Media</h1>
+<form id="public-media-upload-form" enctype="multipart/form-data">
+    {% csrf_token %}
+    <label for="media-file-input">Choose File:</label>
+    <input type="file" id="media-file-input" name="file" accept="image/*,video/*,application/pdf" required><br><br>
+
+    <label for="media-title">Title (Optional):</label>
+    <input type="text" id="media-title" name="title"><br><br>
+
+    <label for="media-description">Description (Optional):</label><br>
+    <textarea id="media-description" name="description" rows="4" cols="50"></textarea><br><br>
+
+    <label>
+        <input type="checkbox" id="is-public-checkbox" name="is_public" value="true" checked>
+        Make Public (visible to others)
+    </label><br><br>
+
+    <button type="submit">Upload Media</button>
+</form>
+
+<div id="upload-status"></div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.getElementById('public-media-upload-form').addEventListener('submit', async function(event) {
+        event.preventDefault();
+
+        const form = event.target;
+        const formData = new FormData(form);
+        const statusDiv = document.getElementById('upload-status');
+
+        statusDiv.innerHTML = 'Uploading...';
+        statusDiv.style.color = 'blue';
+
+        try {
+            const response = await fetch('{% url "api:upload_public_profile_media" %}', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken') // Function from messaging/detail.html
+                }
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                statusDiv.innerHTML = 'Upload successful! Media URL: <a href="' + data.media_url + '" target="_blank">' + data.media_url + '</a>';
+                statusDiv.style.color = 'green';
+                form.reset(); // Clear form
+            } else {
+                statusDiv.innerHTML = 'Upload failed: ' + (data.error || 'Unknown error');
+                statusDiv.style.color = 'red';
+            }
+        } catch (error) {
+            console.error('Error during upload:', error);
+            statusDiv.innerHTML = 'An unexpected error occurred during upload.';
+            statusDiv.style.color = 'red';
+        }
+    });
+
+    // Reuse getCookie function from previous steps
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+</script>
+{% endblock %}

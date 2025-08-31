@@ -1,0 +1,29 @@
+{% extends "dashboards/base_dashboard.html" %}
+
+{% block page_title %}Donation Status{% endblock %}
+
+{% block dashboard_content %}
+<div class="card shadow-sm">
+    <div class="card-header bg-{{ message_type }} text-white">
+        <h4 class="mb-0">Donation Status</h4>
+    </div>
+    <div class="card-body">
+        <p class="card-text">{{ message }}</p>
+        
+        {% if transaction %}
+            <p><strong>Transaction ID:</strong> {{ transaction.transaction_id }}</p>
+            <p><strong>Amount:</strong> {{ transaction.amount|floatformat:8 }} USD</p>
+            {% if transaction.crypto_currency %}
+            <p><strong>Cryptocurrency:</strong> {{ transaction.crypto_currency|upper }}</p>
+            {% endif %}
+            <p><strong>Status:</strong> <span class="badge bg-{{ transaction.status|lower|cut:'_'|slice:'0:7'|default:'info' }}">{{ transaction.get_status_display }}</span></p>
+            {% if transaction.donor_name %}
+            <p><strong>Donor:</strong> {{ transaction.donor_name }}</p>
+            {% endif %}
+        {% endif %}
+
+        <a href="{% url 'home' %}" class="btn btn-primary mt-3">Back to Home</a>
+        <a href="{% url 'wallet:donate' %}" class="btn btn-secondary mt-3">Make another donation</a>
+    </div>
+</div>
+{% endblock %}

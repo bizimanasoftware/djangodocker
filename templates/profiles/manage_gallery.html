@@ -1,0 +1,74 @@
+<!-- /home/deploy/gloexproject/templates/profiles/manage_gallery.html -->
+{% extends "dashboards/base_dashboard.html" %}
+
+{% block title %}Manage Gallery{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h1 class="mb-4">Manage Your Gallery</h1>
+    <p>You can upload up to 20 images. You have <strong>{{ remaining_slots }}</strong> slot(s) remaining.</p>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-success">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ formset.management_form }}
+
+        <div class="card">
+            <div class="card-header">
+                <h5>Upload New Images</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for form in formset %}
+                        {% if not form.instance.pk %}
+                        <div class="col-md-4 mb-3">
+                            {{ form.image.label_tag }}
+                            {{ form.image }}
+                            {{ form.id }}
+                        </div>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <hr class="my-4">
+
+        <div class="card">
+            <div class="card-header">
+                <h5>Current Images</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                {% for form in formset %}
+                    {% if form.instance.pk %}
+                    <div class="col-md-3 mb-4">
+                        <div class="gallery-item text-center">
+                            <img src="{{ form.instance.image.url }}" class="img-thumbnail mb-2" style="height: 150px; width: 100%; object-fit: cover;" alt="Gallery Image">
+                            <div class="form-check">
+                                {{ form.DELETE }}
+                                <label for="{{ form.DELETE.id_for_label }}" class="form-check-label">Mark for deletion</label>
+                            </div>
+                            {{ form.id }}
+                        </div>
+                    </div>
+                    {% endif %}
+                {% empty %}
+                    <p class="text-muted">You have not uploaded any images yet.</p>
+                {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-4 d-flex justify-content-end">
+            <a href="{% url 'profiles:dashboard' %}" class="btn btn-secondary me-2">Back to Dashboard</a>
+            <button type="submit" class="btn btn-primary">Save Changes</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

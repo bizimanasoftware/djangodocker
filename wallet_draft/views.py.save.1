@@ -1,0 +1,528 @@
+# wallet/views.py (full content, with P2P deposit sections updated and a new view added)
+
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.urls import reverse
+from django.contrib import messages
+from django.db import transaction as db_transaction
+from django.conf import settings # Import settings to access keys
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse, HttpResponse
+from decimal import Decimal # Import Decimal for precise financial calculations
+
+import requests
+import json
+import uuid
+import hmac
+import hashlib
+import time # Needed for unique order_id generation if you prefer timestamp
+
+from .models import Wallet, Transaction
+from .forms import (
+    CryptoDepositForm, P2PDepositRequestForm, ProofOfPaymentUploadForm, # Import the new form
+    InternalTransferForm, CryptoWithdrawalForm,
+    P2PWithdrawalRequestForm
+)
+
+# NOWPayments API configuration - loaded from settings
+# Ensure these are defined in your settings.py:
+# NOWPAYMENTS_API_KEY = "YOUR_API_KEY_HERE"
+# NOWPAYMENTS_IPN_SECRET = "YOUR_IPN_SECRET_HERE"
+# NOWPAYMENTS_BASE_URL = 'https://api.nowpayments.io/v1' (optional, good default)
+NOWPAYMENTS_API_KEY = getattr(settings, 'NOWPAYMENTS_API_KEY', None)
+NOWPAYMENTS_IPN_SECRET = getattr(settings, 'NOWPAYMENTS_IPN_SECRET', None)
+NOWPAYMENTS_BASE_URL = getattr(settings, 'NOWPAYMENTS_BASE_URL', 'https://api.nowpayments.io/v1')
+
+@login_required
+def wallet_dashboard(request):
+    wallet, created = Wallet.objects.get_or_create(user=request.user)
+
+    # Fetch all transactions for the user's wallet
+    all_transactions = Transaction.objects.filter(wallet=wallet).order_by('-timestamp')
+
+    # Filter P2P deposit transactions specifically
+    # You can add more complex filtering based on request.GET.get('filter') if needed
+    p2p_deposit_transactions = all_transactions.filter(
+        transaction_type='deposit_p2p'
+    ).exclude(status__in=['completed', 'failed', 'cancelled', 'refunded']) # Only show active/pending P2P deposits
+
+    context = {
+        'wallet': wallet,
+        'transactions': all_transactions, # Pass all transactions for general display
+        'p2p_deposit_transactions': p2p_deposit_transactions, # Pass specific P2P deposits
+    }
+    return render(request, 'wallet/wallet_dashboard.html', context)
+
+@login_required
+def crypto_deposit_request(request):
+    if request.method == 'POST':
+        form = CryptoDepositForm(request.POST)
+        if form.is_valid():
+            amount = form.cleaned_data['amount']
+            crypto_currency_api_code = form.cleaned_data['crypto_currency']
+
+            if not NOWPAYMENTS_API_KEY:
+                messages.error(request, "NOWPayments API Key is not configured in settings.")
+                return render(request, 'wallet/crypto_deposit_request.html', {'form': form})
+
+            try:
+                wallet, created = Wallet.objects.get_or_create(user=request.user)
+                if created:
+                    print(f"DEBUG: Wallet created for user {request.user.username}")
+            except Exception as e:
+                messages.error(request, f"Failed to retrieve or create wallet: {e}")
+                print(f"ERROR: Failed to retrieve or create wallet for user {request.user.username}: {e}")
+                return render(request, 'wallet/crypto_deposit_request.html', {'form': form})
+
+            headers = {
+                'x-api-key': NOWPAYMENTS_API_KEY,
+                'Content-Type': 'application/json'
+            }
+
+            payload = {
+                "price_amount": float(amount),
+                "price_currency": "usd",
+                "pay_currency": crypto_currency_api_code,
+                "ipn_callback_url": request.build_absolute_uri(reverse('wallet:nowpayments_ipn')),
+                "order_id": f"deposit_{request.user.id}_{int(time.time())}",
+                "order_description": f"Deposit to {request.user.username}'s wallet",
+                "success_url": request.build_absolute_uri(reverse('wallet:deposit_success')),
+                "cancel_url": request.build_absolute_uri(reverse('wallet:deposit_cancel')),
+            }
+
+            # --- DEBUGGING PRINTS (Remove/Comment out in production) ---
+            print("\n--- NOWPayments API Request Details ---")
+            print(f"URL: {NOWPAYMENTS_BASE_URL}/payment")
+            print(f"Constructed URL for requests: {f'{NOWPAYMENTS_BASE_URL}/payment'}") # Added for explicit check
+            print(f"Headers: {headers}")
+            print(f"Payload: {json.dumps(payload, indent=2)}")
+            print("-------------------------------------\n")
+            # --- END DEBUGGING PRINTS ---
+
+            try:
+                response = requests.post(f"{NOWPAYMENTS_BASE_URL}/payment", headers=headers, data=json.dumps(payload))
+                response.raise_for_status()
+                nowpayments_data = response.json()
+
+                # --- DEBUGGING PRINTS (Remove/Comment out in production) ---
+                print("\n--- NOWPayments API Response ---")
+                print(f"Status Code: {response.status_code}")
+                print(f"Response Body: {json.dumps(nowpayments_data, indent=2)}")
+                print("------------------------------\n")
+                # --- END DEBUGGING PRINTS ---
+
+                if nowpayments_data.get('payment_id'):
+                    transaction = Transaction.objects.create(
+                        wallet=wallet,
+                        transaction_type='deposit_crypto',
+                        amount=amount,
+                        status='pending',
+                        description=f"Initiated crypto deposit via NOWPayments ({crypto_currency_api_code})",
+                        crypto_currency=crypto_currency_api_code,
+                        crypto_address=nowpayments_data.get('pay_address'),
+                        nowpayments_payment_id=nowpayments_data['payment_id'],
+                        tx_hash=nowpayments_data.get('invoice_url')
+                    )
+                    messages.info(request, "Crypto deposit initiated. Please send funds to the provided address.")
+                    return render(request, 'wallet/crypto_deposit_details.html', {
+                        'nowpayments_data': nowpayments_data,
+                        'transaction_id': transaction.transaction_id
+                    })
+                else:
+                    messages.error(request, f"NOWPayments API error: {nowpayments_data.get('message', 'Unknown error')}")
+            except requests.exceptions.RequestException as e:
+                error_message = f"Error connecting to NOWPayments: {e}"
+                if hasattr(e, 'response') and e.response is not None:
+                    try:
+                        error_details = e.response.json()
+                        error_message += f"\nNOWPayments Error Details: {error_details}"
+                    except json.JSONDecodeError:
+                        error_message += f"\nNOWPayments Raw Error Response: {e.response.text}"
+                print(f"API Request Exception: {error_message}")
+                messages.error(request, error_message)
+            except json.JSONDecodeError:
+                messages.error(request, "Failed to parse NOWPayments response. Invalid JSON received.")
+            except Exception as e:
+                print(f"An unexpected error occurred in crypto_deposit_request (during API call): {e}")
+                messages.error(request, f"An unexpected error occurred: {e}")
+
+        else:
+            messages.error(request, "Please correct the errors in the deposit form.")
+    else:
+        form = CryptoDepositForm()
+    context = {'form': form}
+    return render(request, 'wallet/crypto_deposit_request.html', context)
+
+# --- NEW VIEW FOR DONATIONS ---
+def donation_view(request):
+    """
+    A dedicated view for processing crypto donations via NOWPayments.
+    This view is tailored for a more user-friendly donation experience and
+    correctly handles both authenticated and anonymous users.
+    """
+    if request.method == 'POST':
+        form = CryptoDepositForm(request.POST)
+        if form.is_valid():
+            amount = form.cleaned_data['amount']
+            crypto_currency_api_code = form.cleaned_data['crypto_currency']
+
+            if not NOWPAYMENTS_API_KEY:
+                messages.error(request, "NOWPayments API Key is not configured.")
+                return render(request, 'wallet/donate.html', {'form': form})
+            
+            # --- Handle User Identity and Wallet ---
+            # This is the key change to handle anonymous users
+            wallet = None
+            if request.user.is_authenticated:
+                try:
+                    # Get or create the wallet for the logged-in user
+                    wallet, created = Wallet.objects.get_or_create(user=request.user)
+                    user_id_for_order = str(request.user.id)
+                    order_description = f"Donation to Gloex Project from {request.user.username}"
+                except Exception as e:
+                    messages.error(request, f"Failed to retrieve or create wallet: {e}")
+                    return render(request, 'wallet/donate.html', {'form': form})
+            else:
+                # For an anonymous user, we create a unique ID for the order
+                user_id_for_order = str(uuid.uuid4())
+                order_description = "Anonymous Donation to Gloex Project"
+
+            headers = {
+                'x-api-key': NOWPAYMENTS_API_KEY,
+                'Content-Type': 'application/json'
+            }
+            
+            payload = {
+                "price_amount": float(amount),
+                "price_currency": "usd",
+                "pay_currency": crypto_currency_api_code,
+                "ipn_callback_url": request.build_absolute_uri(reverse('wallet:nowpayments_ipn')),
+                "order_id": f"donation_{user_id_for_order}_{int(time.time())}",
+                "order_description": order_description,
+                "success_url": request.build_absolute_uri(reverse('wallet:deposit_success')),
+                "cancel_url": request.build_absolute_uri(reverse('wallet:deposit_cancel')),
+            }
+
+            try:
+                response = requests.post(f"{NOWPAYMENTS_BASE_URL}/payment", headers=headers, json=payload)
+                response.raise_for_status()
+                nowpayments_data = response.json()
+
+                if nowpayments_data.get('payment_id'):
+                    # The transaction is now linked to the wallet only if the user is authenticated
+                    transaction = Transaction.objects.create(
+                        wallet=wallet,  # Will be None for anonymous users
+                        transaction_type='donation',
+                        amount=amount,
+                        status='pending',
+                        description=f"Initiated crypto donation via NOWPayments. Order ID: {nowpayments_data.get('order_id')}",
+                        crypto_currency=crypto_currency_api_code,
+                        crypto_address=nowpayments_data.get('pay_address'),
+                        nowpayments_payment_id=nowpayments_data['payment_id'],
+                        tx_hash=nowpayments_data.get('invoice_url')
+                    )
+                    messages.info(request, "Thank you for your donation! Please follow the instructions to complete the payment.")
+                    return render(request, 'wallet/crypto_deposit_details.html', {
+                        'nowpayments_data': nowpayments_data,
+                        'transaction_id': transaction.transaction_id
+                    })
+                else:
+                    messages.error(request, f"NOWPayments API error: {nowpayments_data.get('message', 'Unknown error')}")
+            except requests.exceptions.RequestException as e:
+                messages.error(request, f"Error connecting to NOWPayments: {e}")
+            except Exception as e:
+                messages.error(request, f"An unexpected error occurred: {e}")
+        else:
+            messages.error(request, "Please correct the errors in the donation form.")
+            
+    else:
+        form = CryptoDepositForm()
+
+    context = {'form': form}
+    return render(request, 'wallet/donate.html', context)
+
+
+# NOWPayments IPN Endpoint (Crucial for receiving payment updates)
+@csrf_exempt # CSRF exempt because it's an external callback
+def nowpayments_ipn(request):
+    if request.method == 'POST':
+        try:
+            if not NOWPAYMENTS_IPN_SECRET:
+                print("SECURITY ALERT: NOWPayments IPN Secret is not configured. IPN signature cannot be verified.")
+
+            signature = request.headers.get('x-nowpayments-sig')
+            request_body = request.body.decode('utf-8')
+
+            print("\n--- NOWPayments IPN Callback Received ---")
+            print(f"Raw Request Body: {request_body}")
+            print(f"X-Nowpayments-Sig: {signature}")
+
+            if not signature:
+                print("IPN Error: Missing X-Nowpayments-Sig header")
+                return HttpResponse(status=400, content="Missing X-Nowpayments-Sig header")
+
+            if not verify_ipn_signature(request_body, signature, NOWPAYMENTS_IPN_SECRET):
+                print(f"IPN Security Alert: Invalid IPN signature for payment. Received: {signature}")
+                return HttpResponse(status=403, content="Invalid IPN signature")
+
+            payload_dict = json.loads(request_body)
+
+            payment_status = payload_dict.get('payment_status')
+            payment_id = payload_dict.get('payment_id')
+            pay_amount = payload_dict.get('pay_amount')
+            actually_paid = payload_dict.get('actually_paid')
+            order_id_from_ipn = payload_dict.get('order_id')
+
+            print(f"IPN Data - Payment ID: {payment_id}, Status: {payment_status}, Crypto Amount: {pay_amount}, Actually Paid: {actually_paid}, Order ID: {order_id_from_ipn}")
+
+            transaction = get_object_or_404(Transaction, nowpayments_payment_id=payment_id)
+            wallet = transaction.wallet
+
+            if payment_status == 'finished':
+                with db_transaction.atomic():
+                    if transaction.status != 'completed':
+                        credited_amount = Decimal(str(actually_paid))
+                        transaction.amount_received_crypto = credited_amount
+                        wallet.update_balance(credited_amount, is_credit=True)
+                        transaction.status = 'completed'
+                        transaction.description += f" (NOWPayments: Fully confirmed. Credited: {credited_amount} {payload_dict.get('pay_currency')})"
+                        transaction.tx_hash = payload_dict.get('tx_hash')
+                        transaction.save()
+                        messages.success(wallet.user, f"Your crypto deposit of {credited_amount} {payload_dict.get('pay_currency')} has been successfully credited!")
+                    else:
+                        print(f"IPN Warning: Payment {payment_id} already completed. Ignoring duplicate 'finished' IPN.")
+            elif payment_status == 'waiting':
+                transaction.status = 'pending'
+                transaction.description += " (NOWPayments: Waiting for payment)"
+                transaction.save()
+            elif payment_status == 'confirming':
+                transaction.status = 'pending'
+                transaction.description += " (NOWPayments: Confirming on blockchain)"
+                transaction.save()
+            elif payment_status == 'partially_paid':
+                transaction.status = 'review'
+                transaction.description += f" (NOWPayments: Partially paid. Actual received: {actually_paid})"
+                transaction.save()
+                messages.warning(wallet.user, f"Your crypto deposit was partially paid. Amount received: {actually_paid}. Awaiting admin review.")
+            elif payment_status in ['failed', 'refunded', 'expired']:
+                with db_transaction.atomic():
+                    if transaction.status != 'completed':
+                        transaction.status = payment_status
+                        transaction.description += f" (NOWPayments: {payment_status})"
+                        transaction.save()
+                        messages.error(wallet.user, f"Your crypto deposit failed/expired. Status: {payment_status}.")
+
+            return JsonResponse({'message': 'IPN received and processed'}, status=200)
+
+        except json.JSONDecodeError:
+            print("IPN Error: Invalid JSON payload received.")
+            return HttpResponse(status=400, content="Invalid JSON payload")
+        except Transaction.DoesNotExist:
+            print(f"IPN Error: Transaction with nowpayments_payment_id '{payment_id}' not found in local DB.")
+            return HttpResponse(status=404, content="Transaction not found in local DB")
+        except Exception as e:
+            print(f"Critical Error processing NOWPayments IPN: {e}")
+            return HttpResponse(status=500, content="Internal server error")
+    return HttpResponse(status=405, content="Method Not Allowed")
+
+# --- IPN Signature Verification Function (Crucial for security!) ---
+def verify_ipn_signature(request_body: str, signature: str, secret_key: str) -> bool:
+    """
+    Verifies the incoming NOWPayments IPN signature.
+    """
+    if not secret_key:
+        print("Warning: IPN_SECRET not configured. Cannot verify signature.")
+        return False
+
+    try:
+        payload_dict = json.loads(request_body)
+        sorted_payload_str = json.dumps(payload_dict, sort_keys=True, separators=(',', ':'))
+        encoded_secret = secret_key.encode('utf-8')
+        encoded_payload = sorted_payload_str.encode('utf-8')
+
+        calculated_signature = hmac.new(
+            encoded_secret,
+            msg=encoded_payload,
+            digestmod=hashlib.sha512
+        ).hexdigest()
+
+        is_valid = hmac.compare_digest(calculated_signature, signature)
+
+        if not is_valid:
+            print(f"Signature Mismatch! Calculated: {calculated_signature}, Received: {signature}")
+
+        return is_valid
+    except json.JSONDecodeError:
+        print("Error: IPN body is not valid JSON for signature verification.")
+        return False
+    except Exception as e:
+        print(f"Error during IPN signature verification: {e}")
+        return False
+
+
+@login_required
+def deposit_success_callback(request):
+    messages.success(request, "Your deposit process was successful. Please check your wallet for updates.")
+    return redirect('wallet:wallet_dashboard')
+
+@login_required
+def deposit_cancel_callback(request):
+    messages.error(request, "Your deposit process was cancelled.")
+    return redirect('wallet:wallet_dashboard')
+
+# --- UPDATED P2P Deposit Request View ---
+@login_required
+def p2p_deposit_request(request):
+    if request.method == 'POST':
+        form = P2PDepositRequestForm(request.POST) # No files initially
+        if form.is_valid():
+            with db_transaction.atomic():
+                transaction = form.save(commit=False)
+                transaction.wallet = request.user.wallet
+                transaction.transaction_type = 'deposit_p2p'
+                # New status: User has requested, admin needs to provide details
+                transaction.status = 'awaiting_admin_instructions'
+                transaction.description = f"P2P Deposit Request via {transaction.payment_method}. User awaiting payment instructions."
+                transaction.save()
+
+                messages.info(request, "Your P2P deposit request has been submitted. An admin will provide payment instructions shortly.")
+                # Redirect user to a page where they can see their pending P2P deposits
+                # and later upload proof. For now, redirect to dashboard.
+                return redirect('wallet:wallet_dashboard')
+    else:
+        form = P2PDepositRequestForm()
+    context = {'form': form}
+    return render(request, 'wallet/p2p_deposit_request.html', context)
+
+
+# --- NEW VIEW: For User to Upload Proof of Payment ---
+@login_required
+def p2p_deposit_upload_proof(request, transaction_id):
+    transaction = get_object_or_404(Transaction, transaction_id=transaction_id, wallet__user=request.user)
+
+    # Only allow uploading proof if the transaction is in 'awaiting_proof_of_payment' status
+    if transaction.status != 'awaiting_proof_of_payment':
+        messages.error(request, f"This transaction is not in a state where proof of payment can be uploaded. Current status: {transaction.status}")
+        return redirect('wallet:wallet_dashboard') # Or an appropriate transaction detail page
+
+    if request.method == 'POST':
+        form = ProofOfPaymentUploadForm(request.POST, request.FILES, instance=transaction)
+        if form.is_valid():
+            with db_transaction.atomic():
+                form.save()
+                transaction.status = 'review' # Change status back to review after proof is uploaded
+                transaction.description += " (Proof of payment uploaded by user)"
+                transaction.save()
+                messages.success(request, "Proof of payment uploaded successfully. Your deposit will be reviewed by an admin.")
+                return redirect('wallet:wallet_dashboard') # Or redirect to the transaction detail page
+        else:
+            messages.error(request, "Please correct the errors in the form.")
+    else:
+        form = ProofOfPaymentUploadForm(instance=transaction)
+
+    context = {
+        'form': form,
+        'transaction': transaction
+    }
+    return render(request, 'wallet/p2p_deposit_upload_proof.html', context)
+
+
+@login_required
+def internal_transfer(request):
+    if request.method == 'POST':
+        form = InternalTransferForm(request.POST, user=request.user)
+        if form.is_valid():
+            recipient = form.cleaned_data['recipient_username']
+            amount = form.cleaned_data['amount']
+            description = form.cleaned_data['description']
+
+            with db_transaction.atomic():
+                sender_wallet = request.user.wallet
+                recipient_wallet = recipient.wallet
+
+                sender_wallet.update_balance(amount, is_credit=False)
+                Transaction.objects.create(
+                    wallet=sender_wallet,
+                    transaction_type='internal_transfer_send',
+                    amount=amount,
+                    status='completed',
+                    description=f"Sent to {recipient.username}: {description}",
+                    sender_wallet=sender_wallet,
+                    receiver_wallet=recipient_wallet,
+                )
+
+                recipient_wallet.update_balance(amount, is_credit=True)
+                Transaction.objects.create(
+                    wallet=recipient_wallet,
+                    transaction_type='internal_transfer_receive',
+                    amount=amount,
+                    status='completed',
+                    description=f"Received from {request.user.username}: {description}",
+                    sender_wallet=sender_wallet,
+                    receiver_wallet=recipient_wallet,
+                )
+                messages.success(request, f"Successfully transferred {amount} to {recipient.username}.")
+
+                return redirect('wallet:wallet_dashboard')
+    else:
+        form = InternalTransferForm(user=request.user)
+    context = {'form': form}
+    return render(request, 'wallet/internal_transfer.html', context)
+
+@login_required
+def crypto_withdrawal_request(request):
+    wallet = request.user.wallet
+    if request.method == 'POST':
+        form = CryptoWithdrawalForm(request.POST, user=request.user)
+        if form.is_valid():
+            amount = form.cleaned_data['amount']
+            crypto_currency = form.cleaned_data['crypto_currency']
+            crypto_address = form.cleaned_data['crypto_address']
+
+            with db_transaction.atomic():
+                wallet.update_balance(amount, is_credit=False)
+
+                Transaction.objects.create(
+                    wallet=wallet,
+                    transaction_type='withdrawal_crypto',
+                    amount=amount,
+                    status='pending',
+                    description=f"Crypto withdrawal request to {crypto_address} ({crypto_currency})",
+                    crypto_currency=crypto_currency,
+                    crypto_address=crypto_address
+                )
+                messages.info(request, "Your crypto withdrawal request has been submitted for admin review.")
+                return redirect('wallet:wallet_dashboard')
+    else:
+        form = CryptoWithdrawalForm(user=request.user)
+    context = {'form': form}
+    return render(request, 'wallet/crypto_withdrawal_request.html', context)
+
+@login_required
+def p2p_withdrawal_request(request):
+    wallet = request.user.wallet
+    if request.method == 'POST':
+        form = P2PWithdrawalRequestForm(request.POST, user_wallet=wallet)
+        if form.is_valid():
+            amount = form.cleaned_data['amount']
+            payment_method = form.cleaned_data['payment_method']
+            payment_details = form.cleaned_data['payment_details']
+
+            with db_transaction.atomic():
+                wallet.update_balance(amount, is_credit=False)
+
+                Transaction.objects.create(
+                    wallet=wallet,
+                    transaction_type='withdrawal_p2p',
+                    amount=amount,
+                    status='pending',
+                    description=f"P2P withdrawal request via {payment_method}",
+                    payment_method=payment_method,
+                    payment_details=payment_details
+                )
+                messages.info(request, "Your P2P withdrawal request has been submitted for admin review.")
+                return redirect('wallet:wallet_dashboard')
+    else:
+        form = P2PWithdrawalRequestForm(user_wallet=wallet)
+    context = {'form': form}
+    return render(request, 'wallet/p2p_withdrawal_request.html', context)

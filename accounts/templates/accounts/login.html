@@ -1,0 +1,29 @@
+{% extends "homepage/base.html" %}
+{% load static %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+<h2>Login</h2>
+
+<form method="POST" novalidate>
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    
+    <div>
+        {{ form.username.label_tag }}<br>
+        {{ form.username }}
+        {{ form.username.errors }}
+    </div>
+    
+    <div>
+        {{ form.password.label_tag }}<br>
+        {{ form.password }}
+        {{ form.password.errors }}
+    </div>
+    
+    <button type="submit">Login</button>
+</form>
+
+<p><a href="{% url 'accounts:register' %}">Don't have an account? Register here</a></p>
+{% endblock %}

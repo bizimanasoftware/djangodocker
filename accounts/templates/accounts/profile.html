@@ -1,0 +1,27 @@
+{% extends "homepage/base.html" %}
+{% load static %}
+
+{% block title %}Profile{% endblock %}
+
+{% block content %}
+<h2>Welcome, {{ user.username }}!</h2>
+
+<ul>
+    <li>Email: {{ user.email }}</li>
+    <li>Role: {{ user.role }}</li>
+    <li>Categories: 
+        {% for cat in user.categories.all %}
+            {{ cat.name }}{% if not forloop.last %}, {% endif %}
+        {% empty %}
+            None
+        {% endfor %}
+    </li>
+    <li>Phone: {{ user.phone }}</li>
+    <li>Country: {{ user.country }}</li>
+    <li>Bio: {{ user.bio }}</li>
+    <li>Verified: {{ user.is_verified }}</li>
+    <li>Profile Public: {{ user.is_profile_public }}</li>
+</ul>
+
+<a href="{% url 'accounts:logout' %}">Logout</a>
+{% endblock %}

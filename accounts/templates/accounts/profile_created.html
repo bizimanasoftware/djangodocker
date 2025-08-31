@@ -1,0 +1,10 @@
+<!-- profile_created.html -->
+{% extends "homepage/base.html" %}
+{% load static %}
+
+{% block title %}Profile Created{% endblock %}
+
+{% block content %}
+<h2>Account Created Successfully!</h2>
+<p>Your account has been created. You can now <a href="{% url 'accounts:login' %}">log in</a>.</p>
+{% endblock %}

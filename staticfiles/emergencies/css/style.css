@@ -1,0 +1,59 @@
+/* emergencies/static/emergencies/css/style.css */
+
+/* General Styles */
+body {
+    background-color: #f8f9fa; /* A light grey background */
+}
+
+.card-img-top {
+    height: 200px;
+    object-fit: cover;
+}
+
+.gallery-image {
+    height: 200px;
+    width: 100%;
+    object-fit: cover;
+}
+
+.sticky-top {
+    top: 20px; /* Offset the sticky element from the top of the viewport */
+}
+
+/* Custom Progress Bar Styling */
+.progress-container {
+    width: 100%;
+    background-color: #e9ecef; /* Light grey background for the bar */
+    border-radius: 0.25rem;
+    overflow: hidden;
+    height: 2rem;
+    position: relative;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,.1);
+}
+
+.progress-bar-custom {
+    height: 100%;
+    text-align: center;
+    color: white;
+    line-height: 2rem;
+    background: linear-gradient(to right, #dc3545, #ffc107, #28a745);
+    background-size: 300% 100%;
+    transition: width 1s ease-in-out, background-position 1s ease-in-out;
+    background-position: var(--progress-position, 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 0.25rem;
+    font-weight: bold;
+    min-width: 25px; /* Ensure text is visible even with low progress */
+}
+
+/* JavaScript in templates will set the --progress-position CSS variable */
+/* To make the color transition work, the JavaScript would need to update
+   this property. For a simple example, we'll just transition the width and use
+   a single background gradient that changes position based on the percentage. */
+/* Example in JS:
+   const percentage = (raised / goal) * 100;
+   const position = 100 - percentage; // 100% (red) -> 0% (green)
+   progressBar.style.setProperty('--progress-position', `${position}%`);
+*/

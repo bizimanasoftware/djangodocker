@@ -1,0 +1,194 @@
+<!-- notifications/templates/notifications/room.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Room</title>
+    <!-- We'll use a little CSS for basic styling to make it look nice -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .chat-container {
+            width: 90%;
+            max-width: 600px;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 80vh;
+        }
+        .chat-header {
+            padding: 16px;
+            background-color: #4f46e5;
+            color: #ffffff;
+            font-size: 1.25rem;
+            font-weight: 600;
+            text-align: center;
+        }
+        .chat-log {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            border-bottom: 1px solid #e2e8f0;
+            scroll-behavior: smooth;
+        }
+        .message-row {
+            display: flex;
+            margin-bottom: 15px;
+        }
+        .message-content {
+            padding: 12px 18px;
+            border-radius: 20px;
+            max-width: 70%;
+            line-height: 1.5;
+            word-wrap: break-word;
+        }
+        .sent {
+            background-color: #4f46e5;
+            color: #ffffff;
+            margin-left: auto;
+            border-bottom-right-radius: 4px;
+        }
+        .received {
+            background-color: #e2e8f0;
+            color: #1a202c;
+            margin-right: auto;
+            border-bottom-left-radius: 4px;
+        }
+        .message-timestamp {
+            font-size: 0.75rem;
+            color: #718096;
+            margin-top: 4px;
+            text-align: right;
+        }
+        .chat-input {
+            display: flex;
+            padding: 12px;
+            background-color: #ffffff;
+            border-top: 1px solid #e2e8f0;
+        }
+        .chat-input input {
+            flex: 1;
+            padding: 12px 16px;
+            border-radius: 20px;
+            border: 1px solid #cbd5e0;
+            font-size: 1rem;
+        }
+        .chat-input input:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+        }
+        .chat-input button {
+            margin-left: 10px;
+            padding: 12px 20px;
+            background-color: #4f46e5;
+            color: #ffffff;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: background-color 0.2s;
+        }
+        .chat-input button:hover {
+            background-color: #3e38b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            Chat Room
+        </div>
+        <div class="chat-log" id="chat-log">
+            <!-- Messages will be added here dynamically -->
+        </div>
+        <div class="chat-input">
+            <input id="chat-message-input" type="text" placeholder="Type a message...">
+            <button id="chat-message-submit">Send</button>
+        </div>
+    </div>
+
+    <script>
+        // Use `window.location.host` to dynamically get the host, which is great for different environments.
+        const chatSocket = new WebSocket(
+            'ws://' + window.location.host + '/ws/notifications/'
+        );
+
+        // When the WebSocket connection is opened
+        chatSocket.onopen = function(e) {
+            console.log("WebSocket connection established!");
+        };
+
+        // When the WebSocket connection is closed
+        chatSocket.onclose = function(e) {
+            console.error('Chat socket closed unexpectedly');
+        };
+
+        // When a message is received from the WebSocket
+        chatSocket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            console.log('Received message:', data);
+            
+            // Get the chat log element
+            const chatLog = document.getElementById('chat-log');
+            
+            // Create a new message element
+            const messageElement = document.createElement('div');
+            messageElement.className = 'message-row';
+
+            // Create the content bubble
+            const contentElement = document.createElement('div');
+            contentElement.className = 'message-content ' + (data.sender_id === '{{ request.user.id }}' ? 'sent' : 'received');
+            contentElement.textContent = data.message;
+            
+            // Append the content to the message row
+            messageElement.appendChild(contentElement);
+            
+            // Add the new message to the chat log and scroll to the bottom
+            chatLog.appendChild(messageElement);
+            chatLog.scrollTop = chatLog.scrollHeight;
+        };
+
+        // Function to send a message to the server
+        function sendMessage() {
+            const messageInput = document.getElementById('chat-message-input');
+            const message = messageInput.value;
+
+            if (message.trim() !== '') {
+                // Send the message as a JSON string to the WebSocket
+                chatSocket.send(JSON.stringify({
+                    'message': message
+                }));
+
+                // Clear the input field
+                messageInput.value = '';
+            }
+        }
+
+        // Add event listener for the "Send" button
+        document.getElementById('chat-message-submit').onclick = sendMessage;
+
+        // Add event listener for the 'Enter' key on the input field
+        document.getElementById('chat-message-input').onkeyup = function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        };
+
+        // Focus on the input field when the page loads
+        document.getElementById('chat-message-input').focus();
+    </script>
+</body>
+</html>

@@ -1,0 +1,96 @@
+# wallet/admin.py (UPDATED FOR SPONSORSHIP)
+from django.contrib import admin
+from django.urls import reverse
+from django.utils.html import format_html
+from .models import Wallet, Transaction
+
+@admin.register(Wallet)
+class WalletAdmin(admin.ModelAdmin):
+    list_display = ('user', 'balance', 'created_at', 'updated_at')
+    search_fields = ('user__username', 'user__email')
+    # ... (rest of your WalletAdmin)
+
+@admin.register(Transaction)
+class TransactionAdmin(admin.ModelAdmin):
+    list_display = (
+        'transaction_id', 
+        'transaction_type', 
+        'recipient_user', # RENAMED for clarity
+        'sponsor_info',   # NEW column
+        'amount', 
+        'status',
+        'timestamp', 
+        'admin_actions_column'
+    )
+    list_filter = ('transaction_type', 'status', 'timestamp')
+    search_fields = (
+        'wallet__user__username', # Recipient
+        'sponsor__username',      # Sponsor (if logged in)
+        'sponsor_guest_email',    # Sponsor (if guest)
+        'transaction_id', 
+        'description'
+    )
+    readonly_fields = (
+        'timestamp', 'transaction_id', 'sponsor', 'sponsor_guest_email', 'sponsor_guest_name'
+    )
+
+    fieldsets = (
+        ('Primary Details', {
+            'fields': ('wallet', 'transaction_type', 'amount', 'status', 'description')
+        }),
+        ('Sponsor Information', {
+            'fields': ('sponsor', 'sponsor_guest_name', 'sponsor_guest_email'),
+            'classes': ('collapse',),
+            'description': 'This section contains information about the person who made the sponsorship/donation.'
+        }),
+        ('Admin Management', {
+            'fields': ('admin_notes', 'admin_payment_instructions', 'user_proof_of_payment'),
+        }),
+        # ... (rest of your fieldsets)
+    )
+
+    def recipient_user(self, obj):
+        if obj.wallet and obj.wallet.user:
+            return obj.wallet.user.username
+        return "N/A"
+    recipient_user.short_description = 'Recipient'
+    recipient_user.admin_order_field = 'wallet__user__username'
+
+    def sponsor_info(self, obj):
+        if obj.transaction_type == 'sponsorship_deposit':
+            if obj.sponsor:
+                # Link to the sponsor's admin page
+                sponsor_url = reverse('admin:auth_user_change', args=[obj.sponsor.pk])
+                return format_html('<a href="{}">{} (User)</a>', sponsor_url, obj.sponsor.username)
+            elif obj.sponsor_guest_email:
+                return f"{obj.sponsor_guest_name or 'Guest'} ({obj.sponsor_guest_email})"
+        return "N/A"
+    sponsor_info.short_description = 'Sponsor'
+
+    # Add your existing admin actions and methods here
+    def get_urls(self):
+        # ... your existing get_urls method
+        return super().get_urls()
+
+    def admin_actions_column(self, obj):
+        actions = []
+        # Action for Sponsorship and P2P deposits
+        if obj.transaction_type in ['deposit_p2p', 'sponsorship_deposit']:
+            if obj.status == 'awaiting_admin_instructions':
+                provide_instructions_url = reverse('admin:wallet_transaction_provide_instructions', args=[obj.pk])
+                actions.append(f'<a class="button" href="{provide_instructions_url}">Provide Instructions</a>')
+            elif obj.status == 'review' and obj.user_proof_of_payment:
+                approve_url = reverse('admin:wallet_transaction_approve', args=[obj.pk])
+                reject_url = reverse('admin:wallet_transaction_reject', args=[obj.pk])
+                actions.append(f'<a class="button" href="{approve_url}">Approve</a>')
+                actions.append(f'<a class="button" href="{reject_url}">Reject</a>')
+        
+        # ... rest of your admin_actions_column logic
+        
+        if not actions:
+            return "N/A"
+        return format_html(' '.join(actions))
+    admin_actions_column.short_description = 'Admin Actions'
+
+    # Make sure you have the approve, reject, and provide_instructions views from your original admin.py
+    # ...

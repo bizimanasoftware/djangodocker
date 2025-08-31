@@ -1,0 +1,33 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% static "admin/css/forms.css" %}">{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    <form method="post" enctype="multipart/form-data" novalidate>
+        {% csrf_token %}
+        <fieldset class="module aligned">
+            <h2>{{ title }}</h2>
+            <div class="form-row">
+                {{ form.recipients.label_tag }} {{ form.recipients }}
+                <p class="help">{{ form.recipients.help_text }}</p>
+            </div>
+            <div class="form-row">
+                {{ form.subject.label_tag }} {{ form.subject }}
+            </div>
+            <div class="form-row">
+                {{ form.body.label_tag }}
+                <div class="textarea-container">{{ form.body }}</div>
+            </div>
+            <div class="form-row">
+                {{ form.attachments.label_tag }} {{ form.attachments }}
+                <p class="help">{{ form.attachments.help_text }}</p>
+            </div>
+        </fieldset>
+        <div class="submit-row">
+            <input type="submit" value="Send Email" class="default">
+        </div>
+    </form>
+</div>
+{% endblock %}

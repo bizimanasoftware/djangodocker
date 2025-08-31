@@ -1,0 +1,133 @@
+{# wallet/templates/wallet/wallet_dashboard.html #}
+
+{% extends "dashboards/base_dashboard.html" %}
+
+{% block page_title %}My Wallet Dashboard{% endblock %}
+
+{% block dashboard_content %}
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3>Current Wallet Balance</h3>
+            </div>
+            <div class="card-body">
+                <h4 class="card-title">{{ wallet.balance|floatformat:8 }} USD</h4> {# Corrected floatformat, assuming USD balance. Adjust '8' for desired precision. #}
+                <p class="card-text">Your primary wallet balance.</p>
+                <a href="{% url 'wallet:deposit_method_selection' %}" class="btn btn-primary btn-sm me-2">Deposit</a> {# Corrected class attribute #}
+                <a href="{% url 'wallet:crypto_withdrawal_request' %}" class="btn btn-danger btn-sm me-2">Withdraw Crypto</a> {# Corrected class attribute #}
+                <a href="{% url 'wallet:p2p_withdrawal_request' %}" class="btn btn-warning btn-sm me-2">Withdraw P2P</a> {# Corrected class attribute #}
+                <a href="{% url 'wallet:internal_transfer' %}" class="btn btn-secondary btn-sm me-2">Internal Transfer</a> {# Corrected class attribute #}
+                <a href="{% url 'wallet:donate' %}" class="btn btn-info btn-sm me-2">Make a Donation</a> {# Corrected class attribute #}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header">
+                <h3>Pending P2P Deposit Requests</h3>
+            </div>
+            <div class="card-body">
+                {% if p2p_deposit_transactions %}
+                    <ul class="list-group">
+                        {% for transaction in p2p_deposit_transactions %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center"> {# Corrected justify-content #}
+                                <div>
+                                    <strong>Amount:</strong> {{ transaction.amount|floatformat:8 }} USD <br> {# Corrected variable name #}
+                                    <strong>Method:</strong> {{ transaction.get_payment_method_display }} <br> {# Corrected variable name and method #}
+                                    <strong>Status:</strong> <span class="badge bg-warning text-dark">{{ transaction.get_status_display }}</span> {# Corrected class attribute #}
+                                    {% if transaction.status == 'awaiting_admin_instructions' %} {# Corrected status value #}
+                                        <p class="mt-2 text-info">Admin is reviewing your request and will provide payment instructions soon.</p> {# Improved message #}
+                                    {% elif transaction.status == 'awaiting_proof_of_payment' %} {# Corrected status value #}
+                                        <div class="mt-2">
+                                            <p class="text-success"><strong>Instructions from Admin:</strong></p> {# Added strong tag #}
+                                            <div class="alert alert-success" role="alert"> {# Corrected class attribute #}
+                                                {{ transaction.admin_payment_instructions|linebreaksbr }} {# Corrected variable name #}
+                                            </div>
+                                            {% if not transaction.user_proof_of_payment %} {# Corrected variable name #}
+                                                <a href="{% url 'wallet:p2p_deposit_upload_proof' transaction.transaction_id %}" class="btn btn-success mt-2"> {# Corrected URL name and class #}
+                                                    <i class="fas fa-upload"></i> Upload Proof of Payment
+                                                </a>
+                                            {% else %}
+                                                <p class="mt-2 text-muted">Proof already uploaded. Awaiting admin review.</p> {# Corrected text-muted #}
+                                            {% endif %}
+                                        </div>
+                                    {% elif transaction.status == 'in_review' and transaction.user_proof_of_payment %} {# Corrected status value #}
+                                        <p class="mt-2 text-info">Your payment proof has been uploaded and is under admin review.</p>
+                                        <a href="{{ transaction.user_proof_of_payment.url }}" target="_blank" class="btn btn-outline-primary btn-sm mt-2">Uploaded Proof</a> {# Corrected class and text #}
+                                    {% endif %}
+                                    {% if transaction.admin_notes %}
+                                        <p class="mt-2 text-muted small">Admin Notes: {{ transaction.admin_notes }}</p> {# Corrected text and class #}
+                                    {% endif %}
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="card-text">No pending P2P deposit requests.</p> {# Corrected text #}
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3>All Recent Transactions</h3>
+            </div>
+            <div class="card-body">
+                {% if transactions %}
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover"> {# Corrected trailing quote #}
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Type</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Timestamp</th>
+                                    <th>Description</th>
+                                    <th>Details</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for tx in transactions %}
+                                <tr>
+                                    <td>{{ tx.transaction_id|stringformat:":8" }}...</td> {# Corrected filter name #}
+                                    <td>{{ tx.get_transaction_type_display }}</td> {# Corrected method name #}
+                                    <td>{{ tx.amount|floatformat:8 }}</td> {# Corrected trailing tag #}
+                                    <td><span class="badge bg-{% if tx.status == 'completed' %}success{% elif tx.status == 'pending' or tx.status == 'awaiting_admin_instructions' or tx.status == 'awaiting_proof_of_payment' or tx.status == 'in_review' %}warning{% else %}danger{% endif %}">{{ tx.get_status_display }}</span></td> {# Corrected status checks and trailing tag #}
+                                    <td>{{ tx.timestamp|date:"Y-m-d H:i" }}</td> {# Corrected trailing tag #}
+                                    <td>{{ tx.description|default:"N/A" }}</td> {# Corrected trailing tag #}
+                                    <td>
+                                        {% if tx.transaction_type == 'crypto_deposit' and tx.nowpayments_payment_id %} {# Corrected transaction_type #}
+                                            <a href="{% url 'wallet:crypto_deposit_details' tx.transaction_id %}" class="btn btn-sm btn-outline-primary">Details</a> {# Corrected URL name and class #}
+                                        {% elif tx.transaction_type == 'crypto_donation' and tx.nowpayments_payment_id %} {# Corrected transaction_type #}
+                                            <a href="{% url 'wallet:crypto_donation_details' tx.transaction_id %}" class="btn btn-sm btn-outline-info">Details</a> {# Corrected URL name and class #}
+                                        {% elif tx.transaction_type == 'withdrawal_crypto' and tx.crypto_address %} {# Corrected transaction_type #}
+                                            Crypto: {{ tx.crypto_currency }} {{ tx.crypto_address|slice:":10" }}... {# Corrected variable name #}
+                                        {% elif tx.transaction_type == 'p2p_deposit' or tx.transaction_type == 'withdrawal_p2p' %} {# Corrected transaction_type #}
+                                            Method: {{ tx.get_payment_method_display }} {# Corrected method name #}
+                                            {% if tx.user_proof_of_payment %}<a href="{{ tx.user_proof_of_payment.url }}" target="_blank" class="btn btn-outline-primary btn-sm">Proof</a>{% endif %} {# Corrected class and text #}
+                                            <a href="{% url 'wallet:p2p_deposit_details' tx.transaction_id %}" class="btn btn-sm btn-outline-info">View</a> {# Corrected URL name and text #}
+                                        {% elif tx.transaction_type == 'internal_transfer_send' %} {# Corrected transaction_type #}
+                                            To: {{ tx.receiver_wallet.owner.username }} {# Assumed receiver_wallet and owner for display #}
+                                        {% elif tx.transaction_type == 'internal_transfer_receive' %} {# Corrected transaction_type #}
+                                            From: {{ tx.sender_wallet.owner.username }} {# Assumed sender_wallet and owner for display #}
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p>No transactions found.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

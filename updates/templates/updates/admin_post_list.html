@@ -1,0 +1,55 @@
+{% extends "homepage/base.html" %}
+{% load static %}
+
+{% block title %}Manage News & Updates{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Manage Posts</h1>
+        <a href="{% url 'updates:post_create' %}" class="btn btn-success">
+            <i class="fas fa-plus"></i> New Post
+        </a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Category</th>
+                            <th>Status</th>
+                            <th>Published Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for post in posts %}
+                        <tr>
+                            <td><a href="{{ post.get_absolute_url }}">{{ post.title }}</a></td>
+                            <td>{{ post.category.name }}</td>
+                            <td>
+                                <span class="badge {% if post.status == 'PB' %}bg-success{% else %}bg-warning{% endif %}">
+                                    {{ post.get_status_display }}
+                                </span>
+                            </td>
+                            <td>{{ post.published_at|date:"Y-m-d H:i" }}</td>
+                            <td>
+                                <a href="{% url 'updates:post_update' post.slug %}" class="btn btn-sm btn-primary">Edit</a>
+                                <a href="{% url 'updates:post_delete' post.slug %}" class="btn btn-sm btn-danger">Delete</a>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center">No posts found.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

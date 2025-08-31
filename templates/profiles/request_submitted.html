@@ -1,0 +1,31 @@
+{% extends "homepage/base.html" %}
+{% load static %}
+{% block title %}Request Submitted | Gloex{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="text-center">
+    <img src="{% static 'homepage/images/thank-you.png' %}" alt="Thank You" class="img-fluid mb-4" style="max-width: 150px;">
+
+    <h1 class="text-success fw-bold">Your Request Has Been Submitted!</h1>
+
+    <p class="lead mt-3">
+      Thank you for reaching out to <strong>{{ profile.user.get_full_name }}</strong>. <br>
+      They will review your request and get back to you shortly.
+    </p>
+
+    <div class="my-4">
+      <a href="{% url 'profiles:discover_profiles' %}" class="btn btn-primary btn-lg">
+        Browse More Talents
+      </a>
+      <a href="{% url 'profiles:dashboard' %}" class="btn btn-outline-secondary btn-lg ms-2">
+        Go to Dashboard
+      </a>
+    </div>
+
+    <div class="mt-5">
+      <p class="text-muted">You can also <a href="{% url 'messaging:thread_list' %}">check your messages</a> or manage your requests in your dashboard.</p>
+    </div>
+  </div>
+</div>
+{% endblock %}

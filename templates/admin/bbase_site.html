@@ -1,0 +1,115 @@
+{# templates/admin/base_site.html #}
+
+{% extends "homepage/base.html" %}
+{% load i18n static %}
+
+{# This block is used to customize the browser tab title #}
+{% block title %}{% if subtitle %}{{ subtitle }} | {% endif %}{% if title %}{{ title }} | {% endif %}Gloex Administration{% endblock %}
+
+{% block extra_head %}
+    {{ block.super }}
+    {# Add custom CSS to style the admin interface to match your theme. #}
+    <style>
+        .admin-sidebar {
+            /* Applying a similar gradient to your dashboard's sidebar */
+            background: linear-gradient(135deg, #FFC0CB 0%, #ADD8E6 50%, #FFD700 100%);
+            padding-top: 20px;
+            padding-left: 15px;
+            min-height: 100vh;
+        }
+
+        .admin-main-content {
+            padding-top: 20px;
+            padding-left: 30px;
+        }
+
+        /* New white container for the main admin content */
+        .admin-content-container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 2rem;
+        }
+
+        /* Styling tables to fit the new container */
+        .admin-content-container table.table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .admin-content-container table.table th,
+        .admin-content-container table.table td {
+            border: 1px solid #dee2e6;
+            padding: 12px;
+            text-align: left;
+        }
+
+        .admin-content-container table.table th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+        }
+
+        #branding h1 a {
+            color: #ffffff; /* White text for the admin title */
+            font-weight: bold;
+        }
+
+        /* Adjusting link styles to match your theme */
+        .admin-sidebar a {
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: bold;
+            display: block;
+            padding: 8px 12px;
+            border-radius: 4px;
+            margin-bottom: 5px;
+        }
+        .admin-sidebar a:hover {
+            color: #fff;
+            background-color: rgba(255, 255, 255, 0.25);
+        }
+        .admin-sidebar a.current {
+            background-color: rgba(255, 255, 255, 0.35);
+        }
+    </style>
+{% endblock %}
+
+{% block branding %}
+    {# The main title in the admin header #}
+    <div id="branding">
+        <h1 id="site-name"><a href="{% url 'admin:index' %}">Gloex Administration</a></h1>
+    </div>
+{% endblock %}
+
+{# This block is for global navigation and is intentionally left empty to remove the default top links. #}
+{% block nav-global %}{% endblock %}
+
+{% block content %}
+    <div class="row g-0">
+        {# This is the sidebar column, containing the navigation #}
+        <aside class="col-md-3 col-lg-2 admin-sidebar">
+            {# This is the main admin sidebar navigation, filled by Django #}
+            {% block nav-sidebar %}
+                {% if user.is_authenticated %}
+                    {% include "admin/app_list.html" with app_list=available_apps show_changelinks=True %}
+                {% endif %}
+            {% endblock %}
+        </aside>
+
+        {# This is the main content column where all admin pages will be rendered #}
+        <main class="col-md-9 col-lg-10 admin-main-content">
+            <div class="admin-content-container">
+                {% block breadcrumbs %}{% endblock %}
+                {% block messages %}{% endblock %}
+                <div id="content" class="{% block content_class %}content-main{% endblock %}">
+                    {% block pretitle %}{% endblock %}
+                    {% block content_title %}{% endblock %}
+                    {% block content_subtitle %}{% endblock %}
+                    {% block object-tools %}{% endblock %}
+                    {% block content_main %}{% endblock %}
+                </div>
+            </div>
+        </main>
+    </div>
+{% endblock %}

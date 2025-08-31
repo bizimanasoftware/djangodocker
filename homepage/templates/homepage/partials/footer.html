@@ -1,0 +1,41 @@
+<footer class="py-4" style="background: linear-gradient(#008000); color: white;">
+  <div class="container">
+    <div class="row">
+
+      <!-- About Gloex -->
+      <div class="col-md-4 mb-4">
+        <h5 class="fw-bold">About Gloex</h5>
+        <p>Gloex is a platform connecting talents, sponsors, and agents worldwide to empower and promote creative and business initiatives.</p>
+      </div>
+
+      <!-- Quick Links -->
+      <div class="col-md-4 mb-4">
+        <h5 class="fw-bold">Quick Links</h5>
+        <ul class="list-unstyled">
+          <li><a href="{% url 'homepage:terms' %}" class="text-white text-decoration-none">Terms&Conditions</a></li>
+          <li><a href="{% url 'homepage:privacy' %}" class="text-white text-decoration-none">privacy policy</a></li>
+          <li><a href="{% url 'homepage:index' %}" class="text-white text-decoration-none">Home</a></li>
+          <li><a href="{% url 'profiles:discover_profiles' %}" class="text-white text-decoration-none">Discover Talents</a></li>
+          <li><a href="{% url 'homepage:become_talent' %}" class="text-white text-decoration-none">Become a Talent</a></li>
+          <li><a href="{% url 'homepage:sponsor_donate' %}" class="text-white text-decoration-none">Sponsor / Donate</a></li>
+          <li><a href="{% url 'emergencies:campaign_list' %}" class="text-white text-decoration-none">Emergency Aid</a></li>
+          <li><a href="{% url 'updates:post_list' %}" class="text-white text-decoration-none">Updates</a></li>
+          <li><a class="btn btn-success btn-lg" href="{% url 'chat_with_admin:contact_us' %}">Contact Us</a></li>
+        </ul>
+      </div>
+
+      <!-- Contact -->
+      <div class="col-md-4 mb-4">
+        <h5 class="fw-bold">E-mail</h5>
+        <p>E: <a href="mailto:info@gloex.org" class="text-white text-decoration-none">info@gloex.org</a></p>
+        <p>@Gloex.org, we serve the world</p>
+      </div>
+      <div id="installPrompt" tabindex="0">
+         📲 Install Gloex
+      </div>
+
+    </div>
+    <hr style="border-color: rgba(255, 255, 255, 0.3);" />
+    <p class="text-center mb-0">&copy; {{ current_year }} Gloex.org All rights reserved.</p>
+  </div>
+</footer>

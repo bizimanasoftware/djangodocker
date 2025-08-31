@@ -1,0 +1,40 @@
+{% extends "homepage/base.html" %}
+{% load static %}
+
+{% block title %}About Us | Gloex.org{% endblock %}
+
+{% block content %}
+<div class="py-20 md:py-28 animate-fade-in">
+    <div class="container mx-auto px-6">
+        <div class="grid lg:grid-cols-2 gap-20 items-center">
+            <div>
+                <h1 class="text-4xl md:text-5xl font-extrabold mb-6">Our Mandate: To Empower the Individual</h1>
+                <p class="text-lg text-slate-400 mb-6">Gloex was founded on a single, powerful belief: that talent is universal, but opportunity is not. We exist to correct this imbalance. We are building the definitive global platform where individuals with extraordinary skills can connect directly with the resources they need to thrive.</p>
+                <p class="text-lg text-slate-400 mb-8">We are more than a marketplace; we are a dedicated ecosystem for career management, financial sponsorship, and global networking, built on the principles of fairness, transparency, and security.</p>
+                <div class="border-t border-slate-700 pt-8">
+                    <h3 class="text-2xl font-bold mb-4">Our Guiding Principles:</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-start">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-blue-400 mr-4 mt-1 flex-shrink-0"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                             <div>
+                                <h4 class="font-bold text-xl text-white">Absolute Integrity</h4>
+                                <p class="text-slate-400">Our verification processes and transparent transaction ledger ensure trust for all parties.</p>
+                             </div>
+                        </div>
+                         <div class="flex items-start">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6 text-blue-400 mr-4 mt-1 flex-shrink-0"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20z"/><path d="M2 12h20"/></svg>
+                             <div>
+                                <h4 class="font-bold text-xl text-white">Borderless Opportunity</h4>
+                                <p class="text-slate-400">We transcend geography, connecting a global community and facilitating cross-border support.</p>
+                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+             <div>
+                <img src="https://placehold.co/600x700/0F172A/334155?text=Gloex+Vision" alt="Gloex Vision" class="rounded-xl shadow-2xl w-full h-auto border border-slate-700" />
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

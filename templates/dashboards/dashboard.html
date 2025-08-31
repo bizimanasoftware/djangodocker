@@ -1,0 +1,98 @@
+<!-- /home/deploy/gloexproject/templates/dashboards/dashboard.html -->
+{% extends "dashboards/base_dashboard.html" %}
+{% load static %}
+
+{% block title %}My Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <h1 class="mb-4">My Dashboard</h1>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="row">
+        <!-- Profile Management Card -->
+        <div class="col-lg-8 mb-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">My Profile</h5>
+                    <a href="{% url 'profiles:edit_profile' %}" class="btn btn-primary btn-sm">
+                        <i class="fas fa-edit me-1"></i> Edit Profile
+                    </a>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 text-center">
+                            {% if profile.profile_picture %}
+                                <img src="{{ profile.profile_picture.url }}" alt="Profile Picture" class="img-fluid rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
+                            {% else %}
+                                <img src="{% static 'images/default_avatar.png' %}" alt="Default Avatar" class="img-fluid rounded-circle mb-3" style="width: 150px;">
+                            {% endif %}
+                            <p class="fw-bold">{{ user.get_full_name|default:user.username }}</p>
+                        </div>
+                        <div class="col-md-8">
+                            <p><strong>Category:</strong> {{ profile.category }}</p>
+                            <p><strong>Bio:</strong> {{ profile.bio|truncatewords:30|default:"No bio set." }}</p>
+                            <p><strong>Profile Status:</strong>
+                                {% if profile.is_public %}
+                                    <span class="badge bg-success">Public</span>
+                                    <a href="{% url 'profiles:profile_detail' profile.pk %}" class="ms-2" target="_blank">View Public Profile</a>
+                                {% else %}
+                                    <span class="badge bg-secondary">Private</span>
+                                {% endif %}
+                            </p>
+                            <a href="{% url 'profiles:manage_gallery' %}" class="btn btn-outline-secondary mt-2">Manage Gallery ({{ profile.gallery_images.count }}/20)</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sponsorship Requests Card -->
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Recent Requests</h5>
+                </div>
+                <div class="card-body">
+                    {% if requests %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>From</th>
+                                    <th>Email</th>
+                                    <th>Type</th>
+                                    <th>Date</th>
+                                    <th>Purpose</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for req in requests %}
+                                <tr>
+                                    <td>{{ req.requester_name }}</td>
+                                    <td>{{ req.requester_email }}</td>
+                                    <td><span class="badge bg-info">{{ req.get_action_display }}</span></td>
+                                    <td>{{ req.created_at|date:"Y-m-d H:i" }}</td>
+                                    <td>{{ req.purpose|truncatechars:50 }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <p class="text-center text-muted">You have not received any requests yet.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

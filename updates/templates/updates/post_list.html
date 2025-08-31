@@ -1,0 +1,67 @@
+{% extends "homepage/base.html" %}
+{% load static humanize %}
+
+{% block title %}News & Updates{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="text-center mb-5">
+        <h2 class="mb-3">Categories</h2>
+        <a href="{% url 'updates:post_list' %}" class="btn btn-sm {% if not selected_category %}btn-success{% else %}btn-outline-success{% endif %} m-1">All Posts</a>
+        {% for category in categories %}
+            <a href="{% url 'updates:post_list_by_category' category.slug %}" class="btn btn-sm {% if selected_category == category.slug %}btn-success{% else %}btn-outline-success{% endif %} m-1">
+                {{ category.name }}
+            </a>
+        {% endfor %}
+    </div>
+
+    <hr>
+
+    <div class="row">
+        {% for post in posts %}
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="card h-100 shadow-sm">
+                    {% if post.featured_image %}
+                        <a href="{{ post.get_absolute_url }}">
+                            <img src="{{ post.featured_image.url }}" class="card-img-top" alt="{{ post.title }}">
+                        </a>
+                    {% endif %}
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">
+                            <a href="{{ post.get_absolute_url }}" class="text-decoration-none" style="color: {{ post.title_color }}; {% if post.underline_title %}text-decoration: underline;{% endif %}">
+                                {{ post.title }}
+                            </a>
+                        </h5>
+                        {% if post.subtitle %}
+                            <h6 class="card-subtitle mb-2 text-muted">{{ post.subtitle }}</h6>
+                        {% endif %}
+                        <p class="card-text flex-grow-1">{{ post.body|striptags|truncatewords:30 }}</p>
+                        <div class="mt-auto d-flex justify-content-between align-items-center">
+                             <a href="{{ post.get_absolute_url }}" class="btn btn-sm btn-success">Read More</a>
+                            <small class="text-muted">{{ post.published_at|naturaltime }}</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12">
+                <p>No updates have been posted yet. Please check back later.</p>
+            </div>
+        {% endfor %}
+    </div>
+            
+    {% if is_paginated %}
+    <nav>
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}">Previous</a></li>
+            {% endif %}
+            <li class="page-item active"><span class="page-link">{{ page_obj.number }}</span></li>
+            {% if page_obj.has_next %}
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}">Next</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+</div>
+{% endblock %}

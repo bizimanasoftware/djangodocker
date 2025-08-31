@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BankPro — Dashboard</title>
+  <!-- Bootstrap 5 -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <!-- Bootstrap Icons -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet" />
+  <!-- DataTables -->
+  <link href="https://cdn.datatables.net/v/bs5/dt-2.0.8/r-3.0.2/datatables.min.css" rel="stylesheet" />
+  <link href="{% static 'homepage/style..css' %}" rel="stylesheet" />
+  <script src="{% static 'homepage/script.js' %}"></script>
+  
+<style>
+    :root {
+      --sidebar-width: 280px;
+    }
+    body {
+      background-color: #f6f8fb;
+    }
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: var(--sidebar-width) 1fr;
+      grid-template-rows: 56px 1fr;
+      grid-template-areas:
+        "sidebar topbar"
+        "sidebar main";
+    }
+    .sidebar {
+      grid-area: sidebar;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      background: linear-gradient(165deg, #0d6efd 0%, #0a58ca 60%, #0a467f 100%);
+      color: #fff;
+      padding: 1rem;
+    }
+    .sidebar .nav-link { color: rgba(255,255,255,.9); }
+    .sidebar .nav-link.active, .sidebar .nav-link:hover { background: rgba(255,255,255,.12); border-radius: .75rem; }
+    .topbar {
+      grid-area: topbar;
+      background: #ffffff;
+      border-bottom: 1px solid #e3e7ef;
+      display: flex;
+      align-items: center;
+      padding: 0 .75rem;
+      gap: .5rem;
+    }
+    .brand {
+      display: flex; align-items:center; gap:.6rem; font-weight: 700; letter-spacing:.2px;
+    }
+    .main { grid-area: main; padding: 1.2rem; }
+
+    /* Auth screens */
+    .auth-wrap { max-width: 460px; margin: 4rem auto; }
+    .logo-dot { width: 10px; height: 10px; background:#0d6efd; display:inline-block; border-radius:50%; margin-right:6px; }
+
+    /* Card polish */
+    .card { border: 1px solid #e9edf5; box-shadow: 0 6px 18px rgba(14,32,66,.04); }
+    .metric { display:flex; align-items:center; gap: .9rem; }
+    .metric .icon { width: 44px; height: 44px; border-radius: 12px; display:grid; place-items:center; background:#f1f6ff; }
+
+    /* Dark mode */
+    .dark body, body.dark {
+      background:#0e1320; color:#e7ecf3;
+    }
+    body.dark .topbar { background:#12172a; border-bottom-color:#1b2340; }
+    body.dark .card { background:#0f1527; border-color:#1a2342; }
+    body.dark .sidebar { background: linear-gradient(165deg, #0b1d47 0%, #0a1835 60%, #071022 100%); }
+    body.dark .table { color:#e7ecf3; }
+    body.dark .form-control, body.dark .form-select { background:#0f1527; border-color:#22315f; color:#e7ecf3; }
+  </style>
+</head>
+<body>
+
+<!-- =================== AUTH (Registration/Login) =================== -->
+<section id="auth" class="container auth-wrap">
+  <div class="text-center mb-4">
+    <div class="brand justify-content-center">
+      <span class="logo-dot"></span>
+      <span>BankPro</span>
+    </div>
+    <div class="text-muted">Secure Online Banking — Demo Template</div>
+  </div>
+  <div class="card">
+    <div class="card-body p-4">
+      <ul class="nav nav-tabs mb-3" role="tablist">
+        <li class="nav-item" role="presentation">
+          <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-register" type="button" role="tab">Register</button>
+        </li>
+        <li class="nav-item" role="presentation">
+          <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-login" type="button" role="tab">Login</button>
+        </li>
+      </ul>
+      <div class="tab-content">
+        <!-- Register -->
+        <div class="tab-pane fade show active" id="tab-register" role="tabpanel">
+          <form id="formRegister" class="row g-3" novalidate>
+            <div class="col-12">
+              <label class="form-label">Full Name</label>
+              <input type="text" class="form-control" name="full_name" required />
+              <div class="invalid-feedback">Your full name is required.</div>
+            </div>
+            <div class="col-12">
+              <label class="form-label">Email</label>
+              <input type="email" class="form-control" name="email" required />
+              <div class="invalid-feedback">Please enter a valid email.</div>
+            </div>
+            <div class="col-12">
+              <label class="form-label">Country</label>
+              <select class="form-select" name="country" id="countrySelect" required>
+                <option value="">Select your country…</option>
+              </select>
+              <div class="invalid-feedback">Please choose your country.</div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Password</label>
+              <div class="input-group">
+                <input type="password" class="form-control" name="password" id="regPassword" minlength="8" required />
+                <button class="btn btn-outline-secondary" type="button" id="toggleRegPwd"><i class="bi bi-eye"></i></button>
+              </div>
+              <div class="form-text">Min 8 chars. Use letters, numbers & symbols.</div>
+              <div class="progress mt-2" role="progressbar" aria-label="Password strength">
+                <div class="progress-bar" id="pwdStrength" style="width: 0%">Weak</div>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Confirm Password</label>
+              <input type="password" class="form-control" name="confirm" id="regConfirm" required />
+              <div class="invalid-feedback">Passwords must match.</div>
+            </div>
+            <div class="col-12">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="1" id="terms" required>
+                <label class="form-check-label" for="terms">I agree to the Terms & Privacy Policy</label>
+                <div class="invalid-feedback">You must accept before continuing.</div>
+              </div>
+            </div>
+            <div class="col-12 d-grid">
+              <button class="btn btn-primary" type="submit">Create Account</button>
+            </div>
+          </form>
+        </div>
+        <!-- Login -->
+        <div class="tab-pane fade" id="tab-login" role="tabpanel">
+          <form id="formLogin" class="row g-3" novalidate>
+            <div class="col-12">
+              <label class="form-label">Email</label>
+              <input type="email" class="form-control" name="email" required />
+              <div class="invalid-feedback">Enter your email.</div>
+            </div>
+            <div class="col-12">
+              <label class="form-label">Password</label>
+              <div class="input-group">
+                <input type="password" class="form-control" name="password" id="loginPassword" required />
+                <button class="btn btn-outline-secondary" type="button" id="toggleLoginPwd"><i class="bi bi-eye"></i></button>
+              </div>
+              <div class="form-text">Demo: login with any registered email.</div>
+            </div>
+            <div class="col-12 d-grid">
+              <button class="btn btn-success" type="submit">Login</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- =================== APP LAYOUT =================== -->
+<div class="app d-none" id="appRoot">
+  <!-- Sidebar -->
+  <aside class="sidebar d-flex flex-column">
+    <div class="brand mb-3">
+      <i class="bi bi-bank2 fs-4"></i>
+      <div>
+        BankPro
+        <div class="small opacity-75">Banking Dashboard</div>
+      </div>
+    </div>
+    <nav class="nav flex-column gap-1">
+      <a class="nav-link active" href="#" data-page="dashboard"><i class="bi bi-grid me-2"></i> Overview</a>
+      <a class="nav-link" href="#" data-page="accounts"><i class="bi bi-wallet2 me-2"></i> Accounts</a>
+      <a class="nav-link" href="#" data-page="transactions"><i class="bi bi-arrow-left-right me-2"></i> Transactions</a>
+      <a class="nav-link" href="#" data-page="cards"><i class="bi bi-credit-card-2-front me-2"></i> Cards</a>
+      <a class="nav-link" href="#" data-page="loans"><i class="bi bi-cash-coin me-2"></i> Loans</a>
+      <a class="nav-link" href="#" data-page="settings"><i class="bi bi-gear me-2"></i> Settings</a>
+    </nav>
+    <div class="mt-auto pt-3 border-top border-light-subtle small">
+      <div class="d-flex align-items-center gap-2">
+        <img id="userAvatar" class="rounded-circle" width="36" height="36" src="https://api.dicebear.com/8.x/initials/svg?seed=U" alt="avatar" />
+        <div>
+          <div id="userName">User</div>
+          <div class="opacity-75" id="userCountry">—</div>
+        </div>
+      </div>
+      <div class="d-flex gap-2 mt-2">
+        <button class="btn btn-outline-light btn-sm" id="btnToggleDark"><i class="bi bi-moon-stars"></i></button>
+        <button class="btn btn-light btn-sm" id="btnLogout"><i class="bi bi-box-arrow-right"></i> Logout</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Topbar -->
+  <header class="topbar">
+    <div class="input-group" style="max-width: 420px;">
+      <span class="input-group-text"><i class="bi bi-search"></i></span>
+      <input class="form-control" placeholder="Search transactions, beneficiaries…" />
+    </div>
+    <div class="ms-auto d-flex align-items-center gap-2">
+      <button class="btn btn-outline-secondary position-relative">
+        <i class="bi bi-bell"></i>
+        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill text-bg-danger">3</span>
+      </button>
+      <button class="btn btn-primary"><i class="bi bi-plus-lg me-1"></i> New Transfer</button>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="main">
+    <!-- Overview -->
+    <section data-view="dashboard">
+      <div class="row g-3">
+        <div class="col-md-3">
+          <div class="card p-3">
+            <div class="metric">
+              <div class="icon"><i class="bi bi-cash-coin"></i></div>
+              <div>
+                <div class="text-muted small">Total Balance</div>
+                <div class="fs-5 fw-semibold" id="totalBalance">€12,450.22</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card p-3">
+            <div class="metric">
+              <div class="icon"><i class="bi bi-arrow-down-up"></i></div>
+              <div>
+                <div class="text-muted small">This Month Volume</div>
+                <div class="fs-5 fw-semibold" id="monthVolume">€3,821.76</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card p-3">
+            <div class="metric">
+              <div class="icon"><i class="bi bi-check2-circle"></i></div>
+              <div>
+                <div class="text-muted small">Successful Payments</div>
+                <div class="fs-5 fw-semibold" id="successCount">128</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="card p-3">
+            <div class="metric">
+              <div class="icon"><i class="bi bi-shield-lock"></i></div>
+              <div>
+                <div class="text-muted small">2FA Status</div>
+                <div class="fs-5"><span class="badge text-bg-success">Enabled</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row g-3 mt-1">
+        <div class="col-lg-8">
+          <div class="card p-3">
+            <div class="d-flex justify-content-between align-items-center">
+              <h6 class="mb-0">Monthly Cash Flow</h6>
+              <div class="small text-muted">Last 12 months</div>
+            </div>
+            <canvas id="lineChart" height="120"></canvas>
+          </div>
+        </div>
+        <div class="col-lg-4">
+          <div class="card p-3">
+            <h6>Spending Breakdown</h6>
+            <canvas id="donutChart" height="220"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-3 mt-3">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <h6 class="mb-0">Recent Transactions</h6>
+          <a href="#" class="btn btn-sm btn-outline-secondary" data-page="transactions">View all</a>
+        </div>
+        <div class="table-responsive">
+          <table class="table align-middle" id="recentTable" style="width:100%">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Description</th>
+                <th>Category</th>
+                <th>Amount</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Accounts -->
+    <section data-view="accounts" class="d-none">
+      <div class="row g-3">
+        <div class="col-md-4">
+          <div class="card p-3">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <div class="text-muted small">Main Checking</div>
+                <div class="fs-4 fw-semibold">€6,812.43</div>
+              </div>
+              <i class="bi bi-wallet2 fs-3"></i>
+            </div>
+            <div class="small text-muted mt-2">IBAN: NL12 BANK 0123 4567 89</div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card p-3">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <div class="text-muted small">Savings</div>
+                <div class="fs-4 fw-semibold">€5,201.12</div>
+              </div>
+              <i class="bi bi-piggy-bank fs-3"></i>
+            </div>
+            <div class="small text-muted mt-2">IBAN: NL45 SAVE 9876 5432 10</div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="card p-3">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <div class="text-muted small">Travel Wallet</div>
+                <div class="fs-4 fw-semibold">€436.67</div>
+              </div>
+              <i class="bi bi-globe-europe-africa fs-3"></i>
+            </div>
+            <div class="small text-muted mt-2">Prepaid: 2 cards</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Transactions -->
+    <section data-view="transactions" class="d-none">
+      <div class="card p-3">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h5 class="mb-0">All Transactions</h5>
+          <div class="d-flex gap-2">
+            <select id="filterStatus" class="form-select form-select-sm" style="width: 180px;">
+              <option value="">All Statuses</option>
+              <option value="Succeeded">Succeeded</option>
+              <option value="Pending">Pending</option>
+              <option value="Failed">Failed</option>
+            </select>
+            <select id="filterCategory" class="form-select form-select-sm" style="width: 180px;">
+              <option value="">All Categories</option>
+              <option>Groceries</option>
+              <option>Transport</option>
+              <option>Dining</option>
+              <option>Utilities</option>
+              <option>Income</option>
+              <option>Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-hover" id="txTable" style="width:100%">
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Description</th>
+                <th>Category</th>
+                <th>Amount</th>
+                <th>Channel</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- Cards -->
+    <section data-view="cards" class="d-none">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <div class="card p-3">
+            <div class="d-flex justify-content-between">
+              <div>
+                <div class="text-muted">VISA •••• 1123</div>
+                <div class="fw-semibold">Active</div>
+              </div>
+              <i class="bi bi-credit-card-2-front fs-2"></i>
+            </div>
+            <div class="mt-2 small text-muted">Limit €5,000 • Spent €1,240</div>
+            <div class="mt-3 d-flex gap-2">
+              <button class="btn btn-outline-primary btn-sm">Freeze</button>
+              <button class="btn btn-outline-secondary btn-sm">Replace</button>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card p-3">
+            <div class="d-flex justify-content-between">
+              <div>
+                <div class="text-muted">Mastercard •••• 7784</div>
+                <div class="fw-semibold">Active</div>
+              </div>
+              <i class="bi bi-credit-card-2-front fs-2"></i>
+            </div>
+            <div class="mt-2 small text-muted">Limit €2,500 • Spent €620</div>
+            <div class="mt-3 d-flex gap-2">
+              <button class="btn btn-outline-primary btn-sm">Freeze</button>
+              <button class="btn btn-outline-secondary btn-sm">Replace</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Loans -->
+    <section data-view="loans" class="d-none">
+      <div class="card p-3">
+        <h5>Loans</h5>
+        <p class="text-muted">You have no active loans. Explore personal and business loan options tailored to <span id="loanCountry">your country</span>.</p>
+        <div class="d-flex gap-2">
+          <button class="btn btn-primary">Apply for a Loan</button>
+          <button class="btn btn-outline-secondary">Loan Calculator</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Settings -->
+    <section data-view="settings" class="d-none">
+      <div class="row g-3">
+        <div class="col-md-6">
+          <div class="card p-3">
+            <h5>Profile</h5>
+            <div class="row g-3">
+              <div class="col-12">
+                <label class="form-label">Full Name</label>
+                <input type="text" class="form-control" id="profName" />
+              </div>
+              <div class="col-12">
+                <label class="form-label">Country</label>
+                <select class="form-select" id="profCountry"></select>
+              </div>
+              <div class="col-12">
+                <button class="btn btn-primary" id="saveProfile">Save Changes</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="card p-3">
+            <h5>Security</h5>
+            <div class="form-check form-switch">
+              <input class="form-check-input" type="checkbox" role="switch" id="toggle2FA" checked>
+              <label class="form-check-label" for="toggle2FA">Two-Factor Authentication</label>
+            </div>
+            <div class="mt-3">
+              <button class="btn btn-outline-danger">Reset Password</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- =================== SCRIPTS =================== -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script src="https://cdn.datatables.net/v/bs5/dt-2.0.8/r-3.0.2/datatables.min.js"></script>
+<script>
+  // ----------------- Helpers -----------------
+  const el = s => document.querySelector(s);
+  const els = s => Array.from(document.querySelectorAll(s));
+  const store = {
+    get: (k, d=null) => JSON.parse(localStorage.getItem(k) ?? JSON.stringify(d)),
+    set: (k, v) => localStorage.setItem(k, JSON.stringify(v))
+  };
+
+  const COUNTRIES = [
+    {code:'NL', name:'Netherlands'}, {code:'BE', name:'Belgium'}, {code:'DE', name:'Germany'}, {code:'FR', name:'France'}, {code:'ES', name:'Spain'},
+    {code:'IT', name:'Italy'}, {code:'PT', name:'Portugal'}, {code:'IE', name:'Ireland'}, {code:'GB', name:'United Kingdom'}, {code:'US', name:'United States'},
+    {code:'CA', name:'Canada'}, {code:'AU', name:'Australia'}, {code:'NZ', name:'New Zealand'}, {code:'KE', name:'Kenya'}, {code:'NG', name:'Nigeria'},
+    {code:'ZA', name:'South Africa'}, {code:'GH', name:'Ghana'}, {code:'EG', name:'Egypt'}, {code:'MA', name:'Morocco'}, {code:'TN', name:'Tunisia'},
+    {code:'IN', name:'India'}, {code:'PK', name:'Pakistan'}, {code:'BD', name:'Bangladesh'}, {code:'LK', name:'Sri Lanka'}, {code:'NP', name:'Nepal'},
+    {code:'CN', name:'China'}, {code:'JP', name:'Japan'}, {code:'KR', name:'South Korea'}, {code:'SG', name:'Singapore'}, {code:'MY', name:'Malaysia'},
+    {code:'TH', name:'Thailand'}, {code:'VN', name:'Vietnam'}, {code:'PH', name:'Philippines'}, {code:'ID', name:'Indonesia'}, {code:'AE', name:'United Arab Emirates'},
+    {code:'SA', name:'Saudi Arabia'}, {code:'TR', name:'Türkiye'}, {code:'BR', name:'Brazil'}, {code:'AR', name:'Argentina'}, {code:'CL', name:'Chile'},
+    {code:'CO', name:'Colombia'}, {code:'MX', name:'Mexico'}, {code:'PE', name:'Peru'}, {code:'UY', name:'Uruguay'}, {code:'VE', name:'Venezuela'},
+    {code:'DK', name:'Denmark'}, {code:'SE', name:'Sweden'}, {code:'NO', name:'Norway'}, {code:'FI', name:'Finland'}, {code:'IS', name:'Iceland'},
+    {code:'PL', name:'Poland'}, {code:'CZ', name:'Czechia'}, {code:'AT', name:'Austria'}, {code:'CH', name:'Switzerland'}, {code:'HU', name:'Hungary'},
+    {code:'RO', name:'Romania'}, {code:'BG', name:'Bulgaria'}, {code:'GR', name:'Greece'}, {code:'RU', name:'Russia'}, {code:'UA', name:'Ukraine'},
+  ];
+
+  function populateCountries(select) {
+    select.innerHTML = '<option value="">Select your country…</option>' +
+      COUNTRIES.map(c => `<option value="${c.code}">${c.name}</option>`).join('');
+  }
+
+  populateCountries(document.getElementById('countrySelect'));
+
+  // ----------------- Registration & Login (demo only) -----------------
+  const passwordStrength = (pwd) => {
+    let score = 0;
+    if (!pwd) return 0;
+    if (pwd.length >= 8) score += 25;
+    if (/[A-Z]/.test(pwd)) score += 15;
+    if (/[a-z]/.test(pwd)) score += 15;
+    if (/\d/.test(pwd)) score += 20;
+    if (/[^A-Za-z0-9]/.test(pwd)) score += 25;
+    return Math.min(score, 100);
+  };
+
+  el('#toggleRegPwd').addEventListener('click', () => {
+    const i = el('#regPassword');
+    i.type = i.type === 'password' ? 'text' : 'password';
+  });
+  el('#toggleLoginPwd').addEventListener('click', () => {
+    const i = el('#loginPassword');
+    i.type = i.type === 'password' ? 'text' : 'password';
+  });
+
+  el('#regPassword').addEventListener('input', (e) => {
+    const s = passwordStrength(e.target.value);
+    const bar = el('#pwdStrength');
+    bar.style.width = s + '%';
+    bar.textContent = s < 40 ? 'Weak' : s < 70 ? 'Medium' : 'Strong';
+    bar.className = 'progress-bar ' + (s < 40 ? 'bg-danger' : s < 70 ? 'bg-warning' : 'bg-success');
+  });
+
+  function needsValidation(form){
+    form.classList.add('was-validated');
+    return !form.checkValidity();
+  }
+
+  el('#formRegister').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const form = e.target;
+    if (needsValidation(form)) return;
+    const data = Object.fromEntries(new FormData(form));
+    if (data.password !== data.confirm){
+      el('#regConfirm').setCustomValidity('Mismatch');
+      form.classList.add('was-validated');
+      return;
+    } else { el('#regConfirm').setCustomValidity(''); }
+
+    // Save demo user
+    store.set('bankpro:user', { full_name: data.full_name, email: data.email, country: data.country });
+    // Navigate to app
+    bootUser();
+  });
+
+  el('#formLogin').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const user = store.get('bankpro:user');
+    if (!user){
+      alert('No user registered yet. Please register first.');
+      return;
+    }
+    bootUser();
+  });
+
+  // ----------------- App Boot -----------------
+  function bootUser(){
+    const user = store.get('bankpro:user');
+    if (!user) return;
+    // Fill sidebar user
+    el('#userName').textContent = user.full_name;
+    el('#userCountry').textContent = COUNTRIES.find(c => c.code === user.country)?.name || user.country || '—';
+    el('#loanCountry').textContent = el('#userCountry').textContent;
+    el('#profName').value = user.full_name;
+    const pc = el('#profCountry');
+    populateCountries(pc); pc.value = user.country;
+
+    // Show app
+    el('#auth').classList.add('d-none');
+    el('#appRoot').classList.remove('d-none');
+
+    initCharts();
+    initTables();
+  }
+
+  el('#btnLogout').addEventListener('click', () => {
+    el('#appRoot').classList.add('d-none');
+    el('#auth').classList.remove('d-none');
+  });
+
+  // Save profile
+  el('#saveProfile').addEventListener('click', () => {
+    const user = store.get('bankpro:user') || {};
+    user.full_name = el('#profName').value;
+    user.country = el('#profCountry').value;
+    store.set('bankpro:user', user);
+    bootUser();
+  });
+
+  // Dark mode toggle
+  el('#btnToggleDark').addEventListener('click', () => {
+    document.body.classList.toggle('dark');
+  });
+
+  // Nav routing
+  els('.sidebar .nav-link').forEach(a => a.addEventListener('click', (ev) => {
+    ev.preventDefault();
+    els('.sidebar .nav-link').forEach(l => l.classList.remove('active'));
+    a.classList.add('active');
+    const page = a.getAttribute('data-page');
+    if (!page) return;
+    els('[data-view]').forEach(v => v.classList.toggle('d-none', v.getAttribute('data-view') !== page));
+  }));
+
+  // ----------------- Charts -----------------
+  let lineChart, donutChart;
+  function initCharts(){
+    const lineCtx = document.getElementById('lineChart');
+    if (lineChart) lineChart.destroy();
+    lineChart = new Chart(lineCtx, {
+      type: 'line',
+      data: {
+        labels: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],
+        datasets: [{
+          label: 'Income',
+          data: [1200,1400,1350,1600,1800,1750,2100,2200,1950,2050,2150,2300],
+          tension:.35,
+          fill:false,
+        },{
+          label: 'Expense',
+          data: [900,1100,1250,1200,1500,1300,1600,1650,1500,1450,1550,1700],
+          tension:.35,
+          fill:false,
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { position: 'bottom' } },
+        scales: { y: { beginAtZero: true } }
+      }
+    });
+
+    const donutCtx = document.getElementById('donutChart');
+    if (donutChart) donutChart.destroy();
+    donutChart = new Chart(donutCtx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Groceries','Transport','Dining','Utilities','Other'],
+        datasets: [{ data: [28,14,18,22,18] }]
+      },
+      options: { plugins: { legend: { position: 'bottom' } } }
+    });
+  }
+
+  // ----------------- Tables -----------------
+  const SAMPLE_TX = (() => {
+    const cats = ['Groceries','Transport','Dining','Utilities','Income','Other'];
+    const chans = ['Card','SEPA','Cash','Transfer','ATM'];
+    const stats = ['Succeeded','Pending','Failed'];
+    const descs = ['Albert Heijn','NS Train','Uber','EnergyCo','Salary','Coffee Bar','Amazon','Apple','Water Utility','Gym Membership'];
+    const arr = [];
+    const today = new Date();
+    for (let i=0; i<120; i++){
+      const d = new Date(today);
+      d.setDate(today.getDate() - Math.floor(Math.random()*180));
+      const cat = cats[Math.floor(Math.random()*cats.length)];
+      const ch = chans[Math.floor(Math.random()*chans.length)];
+      const st = stats[Math.floor(Math.random()*stats.length)];
+      const desc = descs[Math.floor(Math.random()*descs.length)];
+      const amt = cat === 'Income' ? (500 + Math.random()*2000) : (-(5 + Math.random()*250));
+      arr.push({
+        date: d.toISOString().slice(0,10),
+        desc, cat, amt: amt.toFixed(2), ch, status: st
+      });
+    }
+    return arr.sort((a,b) => a.date < b.date ? 1 : -1);
+  })();
+
+  let txTable, recentTable;
+  function initTables(){
+    // Recent (compact)
+    recentTable = new DataTable('#recentTable', {
+      data: SAMPLE_TX.slice(0,8).map(t => [t.date, t.desc, t.cat, formatMoney(t.amt), badgeStatus(t.status)]),
+      columns: [
+        { title: 'Date' },
+        { title: 'Description' },
+        { title: 'Category' },
+        { title: 'Amount' },
+        { title: 'Status' }
+      ],
+      paging: false,
+      searching: false,
+      info: false,
+      responsive: true,
+      order: []
+    });
+
+    // All transactions
+    if (txTable) txTable.destroy();
+    txTable = new DataTable('#txTable', {
+      data: SAMPLE_TX.map(t => [t.date, t.desc, t.cat, formatMoney(t.amt), t.ch, badgeStatus(t.status)]),
+      columns: [
+        { title: 'Date' },
+        { title: 'Description' },
+        { title: 'Category' },
+        { title: 'Amount' },
+        { title: 'Channel' },
+        { title: 'Status' }
+      ],
+      pageLength: 10,
+      responsive: true,
+      order: [[0,'desc']]
+    });
+
+    // Filters
+    el('#filterStatus').addEventListener('change', () => applyFilters());
+    el('#filterCategory').addEventListener('change', () => applyFilters());
+  }
+
+  function applyFilters(){
+    const s = el('#filterStatus').value;
+    const c = el('#filterCategory').value;
+    txTable.columns(2).search(c);
+    txTable.columns(5).search(s);
+    txTable.draw();
+  }
+
+  function badgeStatus(s){
+    const map = { Succeeded: 'success', Pending: 'warning', Failed: 'danger' };
+    const cls = map[s] || 'secondary';
+    return `<span class="badge text-bg-${cls}">${s}</span>`;
+  }
+  function formatMoney(n){
+    const num = Number(n);
+    const sign = num < 0 ? '-' : '';
+    return `${sign}€${Math.abs(num).toFixed(2)}`;
+  }
+
+  // Auto-boot if a user already exists
+  if (store.get('bankpro:user')) bootUser();
+</script>
+</body>
+</html>

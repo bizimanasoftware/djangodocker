@@ -1,0 +1,54 @@
+{% extends 'admin/base_site.html' %}
+{% load i18n admin_urls static %}
+
+{% block content %}
+<div id="content-main">
+    <form action="" method="post" id="credit_debit_form" novalidate>
+        {% csrf_token %}
+        <fieldset class="module aligned">
+            <h2>{% trans "Manually Credit or Debit Wallet" %}</h2>
+            <div class="form-row field-user">
+                <div>
+                    {{ form.user.label_tag }}
+                    {{ form.user }}
+                    {% if form.user.errors %}
+                        <ul class="errorlist">{% for error in form.user.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="form-row field-amount">
+                <div>
+                    {{ form.amount.label_tag }}
+                    {{ form.amount }}
+                    {% if form.amount.errors %}
+                        <ul class="errorlist">{% for error in form.amount.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+                    {% endif %}
+                    <p class="help">Use positive numbers. Balance will be updated based on "Is Credit" checkbox.</p>
+                </div>
+            </div>
+            <div class="form-row field-is_credit">
+                <div>
+                    {{ form.is_credit }} {{ form.is_credit.label_tag }}
+                    {% if form.is_credit.errors %}
+                        <ul class="errorlist">{% for error in form.is_credit.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+                    {% endif %}
+                    <p class="help">Check to add funds (Credit), uncheck to remove funds (Debit).</p>
+                </div>
+            </div>
+            <div class="form-row field-description">
+                <div>
+                    {{ form.description.label_tag }}
+                    {{ form.description }}
+                    {% if form.description.errors %}
+                        <ul class="errorlist">{% for error in form.description.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+                    {% endif %}
+                    <p class="help">Enter a description for the transaction, visible in transaction history.</p>
+                </div>
+            </div>
+        </fieldset>
+        <div class="submit-row">
+            <input type="submit" value="{% trans 'Perform Action' %}" class="default" name="_save">
+        </div>
+    </form>
+</div>
+{% endblock %}

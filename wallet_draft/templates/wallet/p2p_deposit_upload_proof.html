@@ -1,0 +1,41 @@
+{% extends "dashboards/base_dashboard.html" %}
+{% load crispy_forms_tags %}
+
+{% block page_title %}Upload P2P Deposit Proof{% endblock %}
+
+{% block dashboard_content %}
+<div class="card shadow-sm">
+    <div class="card-header bg-success text-white">
+        <h4 class="mb-0">Upload Proof of Payment for P2P Deposit</h4>
+    </div>
+    <div class="card-body">
+        <p class="card-text">For transaction ID: <strong>{{ transaction.transaction_id }}</strong></p>
+        <p class="card-text">Please upload the screenshot or receipt of your payment for the pending P2P deposit. Ensure the image clearly shows the amount, date, and recipient details as instructed by the admin.</p>
+
+        {% if transaction.admin_payment_instructions %}
+            <div class="alert alert-info mt-3" role="alert">
+                <strong>Admin's Payment Instructions:</strong><br>
+                {{ transaction.admin_payment_instructions|linebreaksbr }}
+            </div>
+        {% endif %}
+
+        {% if messages %}
+            <div class="mb-3">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form|crispy }}
+            <button type="submit" class="btn btn-success mt-3">Upload Proof</button>
+            <a href="{% url 'wallet:wallet_dashboard' %}" class="btn btn-secondary mt-3">Cancel</a>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,22 @@
+from django.contrib import admin
+from django.urls import path, include
+from .views import dashb_view, dashb_view
+
+app_name = 'artists'  # important for namespacing
+
+urlpatterns = [
+    path('dashboard/', dashboard_view, name='dashboard'),
+    # Authentication URLs
+    path('register/', views.register_view, name='register'),
+    path('login/', views.login_view, name='login'), # Use custom login view to pass 'tab'
+    path('logout/', views.logout_view, name='logout'),
+
+    # Dashboard and API URLs
+    path('api/transactions/', views.get_transactions, name='api_transactions'),
+    path('api/cashflow/', views.get_monthly_cash_flow, name='api_cashflow'),
+    path('api/spending/', views.get_spending_breakdown, name='api_spending'),
+    path('api/accounts/', views.get_accounts_data, name='api_accounts'),
+    path('api/profile/update/', views.update_profile, name='api_update_profile'),
+
+    # Add other API endpoints for Cards, Loans, etc., as needed
+]

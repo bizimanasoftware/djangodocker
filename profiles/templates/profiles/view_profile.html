@@ -1,0 +1,8 @@
+<!-- view_profile.html -->
+{% extends "dashboards/base_dashboard.html" %}
+{% block content %}
+<h2>{{ profile.user.username }}</h2>
+<p>{{ profile.bio }}</p>
+{% if profile.profile_image %}<img src="{{ profile.profile_image.url }}" width="150">{% endif %}
+{% if profile.intro_video %}<video controls width="250"><source src="{{ profile.intro_video.url }}"></video>{% endif %}
+{% endblock %}

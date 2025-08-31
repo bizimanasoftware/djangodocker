@@ -1,0 +1,26 @@
+<!-- emergencies/templates/emergencies/add_payment_method.html -->
+{% extends "dashboards/base_dashboard.html" %}
+{% block title %}Add Payment Method{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h3>Add a New Payment Method</h3>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">Select the type of payment method you want to add. The form will show you the required fields.</p>
+                    <form method="post">
+                        {% csrf_token %}
+                        {{ form.as_p }}
+                        <button type="submit" class="btn btn-success">Add Method</button>
+                        <a href="{% url 'emergencies:dashboard' %}" class="btn btn-secondary">Cancel</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

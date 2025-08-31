@@ -1,0 +1,68 @@
+{% extends "dashboards/base_dashboard.html" %}
+
+{% block page_title %}Crypto Donation Details{% endblock %}
+
+{% block dashboard_content %}
+<div class="card shadow-sm">
+    <div class="card-header bg-success text-white">
+        <h4 class="mb-0">Crypto Donation Details</h4>
+    </div>
+    <div class="card-body">
+        <p class="card-text">Please send your funds to the address below to complete your donation.</p>
+
+        <div class="mb-3">
+            <strong>Payment ID:</strong> {{ nowpayments_data.payment_id }}<br>
+            <strong>Amount to Send:</strong> <span id="payAmount">{{ nowpayments_data.pay_amount }}</span> <span id="payCurrency">{{ nowpayments_data.pay_currency|upper }}</span><br>
+            <strong>Donation Address:</strong> <code class="text-break" id="payAddress">{{ nowpayments_data.pay_address }}</code>
+            <button class="btn btn-outline-secondary btn-sm ms-2" onclick="copyToClipboard('payAddress', this)">
+                <i class="far fa-copy"></i> Copy Address
+            </button><br>
+            {% if nowpayments_data.extra_id %}
+            <strong>Memo/Destination Tag:</strong> <code class="text-break" id="extraId">{{ nowpayments_data.extra_id }}</code>
+            <button class="btn btn-outline-secondary btn-sm ms-2" onclick="copyToClipboard('extraId', this)">
+                <i class="far fa-copy"></i> Copy Memo
+            </button><br>
+            <p class="alert alert-info mt-2">
+                <strong>Important:</strong> For **{{ nowpayments_data.pay_currency|upper }}**, you **must** include the Memo/Destination Tag when sending funds, or your donation may be lost.
+            </p>
+            {% endif %}
+            {% if nowpayments_data.invoice_url %}
+            <strong>Invoice URL:</strong> <a href="{{ nowpayments_data.invoice_url }}" target="_blank" class="text-break">{{ nowpayments_data.invoice_url }}</a>
+            {% endif %}
+        </div>
+
+        {% if nowpayments_data.qrcode_url %}
+        <div class="text-center mb-4">
+            <p class="mb-2">Scan QR Code to Pay:</p>
+            <img src="{{ nowpayments_data.qrcode_url }}" alt="QR Code" class="img-fluid border p-2" style="max-width: 200px;">
+        </div>
+        {% endif %}
+
+        <p class="alert alert-warning">
+            <strong>Important:</strong> Only send {{ nowpayments_data.pay_currency|upper }} to this address. Sending any other cryptocurrency may result in loss of funds.
+        </p>
+
+        <a href="{% url 'wallet:wallet_dashboard' %}" class="btn btn-secondary mt-3">Back to Wallet</a>
+        <a href="{% url 'home' %}" class="btn btn-primary mt-3">Back to Home</a> {# Assuming a 'home' URL #}
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function copyToClipboard(elementId, button) {
+        var copyText = document.getElementById(elementId).innerText;
+        navigator.clipboard.writeText(copyText).then(function() {
+            var originalText = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-check"></i> Copied!';
+            setTimeout(function() {
+                button.innerHTML = originalText;
+            }, 2000);
+        }).catch(function(err) {
+            console.error('Could not copy text: ', err);
+            alert('Failed to copy. Please copy manually: ' + copyText);
+        });
+    }
+</script>
+{% endblock %}

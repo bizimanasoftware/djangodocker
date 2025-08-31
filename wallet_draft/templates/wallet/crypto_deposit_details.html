@@ -1,0 +1,84 @@
+{% extends "dashboards/base_dashboard.html" %}
+
+{% block page_title %}Crypto Deposit Details{% endblock %}
+
+{% block dashboard_content %}
+<div class="card shadow-sm">
+    <div class="card-header">
+        <h4 class="mb-0">Deposit Details for {{ transaction.crypto_currency|upper }}</h4>
+    </div>
+    <div class="card-body">
+        {% if transaction.status == 'pending' %}
+        <p class="alert alert-info"><i class="fas fa-info-circle me-2"></i>Please send the exact amount to the address below to complete your deposit.</p>
+        
+        <div class="row">
+            <div class="col-md-8">
+                <dl class="row">
+                    <dt class="col-sm-4">Amount to Send</dt>
+                    <dd class="col-sm-8"><code id="payAmount" class="fs-5">{{ transaction.nowpayments_pay_amount }}</code> {{ transaction.crypto_currency|upper }}</dd>
+
+                    <dt class="col-sm-4">To Address</dt>
+                    <dd class="col-sm-8">
+                        <code class="text-break" id="payAddress">{{ transaction.nowpayments_pay_address }}</code>
+                        <button class="btn btn-outline-secondary btn-sm ms-2" onclick="copyToClipboard('payAddress', this)"><i class="far fa-copy"></i></button>
+                    </dd>
+
+                    {% if transaction.nowpayments_extra_id %}
+                    <dt class="col-sm-4">Memo / Dest. Tag</dt>
+                    <dd class="col-sm-8">
+                        <code class="text-break" id="extraId">{{ transaction.nowpayments_extra_id }}</code>
+                        <button class="btn btn-outline-secondary btn-sm ms-2" onclick="copyToClipboard('extraId', this)"><i class="far fa-copy"></i></button>
+                        <p class="small text-danger mt-1"><strong>Important:</strong> You must include this Memo/Tag when sending.</p>
+                    </dd>
+                    {% endif %}
+                </dl>
+                <div class="alert alert-warning mt-3">
+                    <p class="mb-0"><strong>Warning:</strong></p>
+                    <ul>
+                        <li>Send only <strong>{{ transaction.crypto_currency|upper }}</strong> to this address.</li>
+                        <li>Do not send from an exchange or service that does not support the specified network.</li>
+                        <li>This address is for a single transaction only. Do not reuse it.</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="col-md-4 text-center">
+                <p>Scan to Pay</p>
+                <div id="qrcode" class="p-2 border d-inline-block"></div>
+            </div>
+        </div>
+        {% elif transaction.status == 'completed' %}
+        <p class="alert alert-success"><i class="fas fa-check-circle me-2"></i>This deposit is complete. Funds have been added to your wallet.</p>
+        {% else %}
+        <p class="alert alert-danger"><i class="fas fa-times-circle me-2"></i>This deposit has failed or was cancelled. Please contact support if you have sent funds.</p>
+        {% endif %}
+
+        <hr>
+        <a href="{% url 'wallet:wallet_dashboard' %}" class="btn btn-secondary">Back to Dashboard</a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const payAddress = document.getElementById('payAddress');
+    if (payAddress) {
+        new QRCode(document.getElementById("qrcode"), {
+            text: payAddress.innerText,
+            width: 180,
+            height: 180,
+        });
+    }
+});
+
+function copyToClipboard(elementId, button) {
+    var copyText = document.getElementById(elementId).innerText;
+    navigator.clipboard.writeText(copyText).then(() => {
+        var originalIcon = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-check"></i>';
+        setTimeout(() => { button.innerHTML = originalIcon; }, 2000);
+    });
+}
+</script>
+{% endblock %}

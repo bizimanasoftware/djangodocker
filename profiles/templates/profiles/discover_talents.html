@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Public Profiles</h2>
+<div class="row">
+  {% for profile in profiles %}
+    <div class="col-md-4">
+      <div class="card mb-4">
+        <img src="{{ profile.profile_image }}" class="card-img-top" alt="Profile Image">
+        <div class="card-body">
+          <h5 class="card-title">{{ profile.user.username }}</h5>
+          <p class="card-text">{{ profile.bio|truncatewords:20 }}</p>
+          <p class="text-muted">{{ profile.category|capfirst }}</p>
+        </div>
+      </div>
+    </div>
+  {% endfor %}
+</div>
+{% endblock %}

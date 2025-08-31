@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>{% block title %}Wallet - Gloex{% endblock %}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    body.with-fixed-header {
+      padding-top: 80px; /* space for fixed header */
+    }
+  </style>
+  {% block extra_head %}{% endblock %}
+</head>
+<body class="with-fixed-header bg-gray-50 text-gray-800">
+
+  <!-- Include full shared header partial here -->
+  <header class="fixed top-0 left-0 w-full bg-white shadow-md z-50">
+    {% include "homepage/partials/header.html" %}
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 py-8">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Include full shared footer partial here -->
+  <footer class="bg-white shadow-inner mt-12">
+    {% include "homepage/partials/footer.html" %}
+  </footer>
+
+</body>
+</html>

@@ -1,0 +1,31 @@
+{% extends "base.html" %} {# Extend your base template #}
+
+{% block content %}
+<h1>Your Conversations</h1>
+<div class="conversation-list">
+    {% for conv in conversations %}
+    <div class="conversation-item">
+        <a href="{% url 'messaging:conversation_detail' conv.id %}">
+            {% for participant in conv.participants.all %}
+                {% if participant != request.user %}
+                    <span>{{ participant.username }}</span>
+                {% endif %}
+            {% endfor %}
+            <small> (Last message: {{ conv.updated_at|date:"M d, H:i" }})</small>
+        </a>
+    </div>
+    {% empty %}
+    <p>You have no active conversations.</p>
+    {% endfor %}
+</div>
+<hr>
+<h2>Start New Conversation</h2>
+{# Example: Link to start conversation with a user (replace with actual user listing) #}
+<ul>
+    {% for other_user in users_to_chat_with %} {# You'll need to pass 'users_to_chat_with' from view #}
+    <li><a href="{% url 'messaging:start_conversation' other_user.id %}">{{ other_user.username }}</a></li>
+    {% endfor %}
+    <li><a href="{% url 'messaging:start_conversation' admin_user.id %}">Chat with Admin</a></li> {# Example #}
+</ul>
+
+{% endblock %}

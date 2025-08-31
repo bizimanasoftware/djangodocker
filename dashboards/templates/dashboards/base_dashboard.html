@@ -1,0 +1,324 @@
+{# dashboards/templates/dashboards/base_dashboard.html #}
+
+{% extends "homepage/base.html" %}
+{% load static %} {# Ensure static files are loaded if you use any custom static assets #}
+
+{% block title %}Dashboard{% endblock %} {# Default title, can be overridden by child templates #}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <div class="row">
+        {# Mobile Sidebar Toggle Button (Hidden on larger screens) #}
+        <div class="col-12 d-md-none mb-3">
+            <button class="btn btn-secondary w-100" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas" aria-controls="sidebarOffcanvas">
+                <i class="fas fa-bars me-2"></i> Toggle Dashboard Menu
+            </button>
+        </div>
+
+        {# The offcanvas sidebar is now placed outside the desktop-only column, so it is always in the DOM for mobile. #}
+        {# The offcanvas-md class ensures it acts as a fixed sidebar on medium and larger screens. #}
+        <div class="offcanvas-md offcanvas-start col-md-3 col-lg-2" tabindex="-1" id="sidebarOffcanvas" aria-labelledby="sidebarOffcanvasLabel">
+            <div class="offcanvas-header d-md-none"> {# Hide header on desktop, only for offcanvas on mobile #}
+                <h5 class="offcanvas-title" id="sidebarOffcanvasLabel">Dashboard Menu</h5>
+                <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            </div>
+            <div class="offcanvas-body p-0"> {# Ensure body is block on desktop #}
+                <nav id="sidebarMenu" class="sidebar collapse show p-3"> {# 'show' to ensure it's visible by default on desktop #}
+                    <div class="position-sticky pt-3">
+                        <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted text-uppercase">
+                            <span>Main Navigation</span>
+                        </h6>
+                        <ul class="nav flex-column">
+                            <li class="nav-item">
+                                {# Dashboard Home link - UPDATED #}
+                                <a class="nav-link {% if request.resolver_match.namespace == 'dashboards' and request.resolver_match.url_name == 'redirect' %}active{% endif %} rounded-md" href="{% url 'dashboards:redirect' %}">
+                                    <i class="fas fa-home me-2"></i> Dashboard Home
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {% if request.resolver_match.namespace == 'wallet' and request.resolver_match.url_name == 'wallet_dashboard' %}active{% endif %} rounded-md" href="{% url 'wallet:wallet_dashboard' %}">
+                                    <i class="fas fa-wallet me-2"></i> My Wallets
+                                </a>
+                            </li>
+                            {# Collapsible Profile Menu - UPDATED #}
+                            <li class="nav-item">
+                                <a class="nav-link rounded-md {% if request.resolver_match.namespace == 'profiles' %}active{% else %}collapsed{% endif %}" data-bs-toggle="collapse" href="#profileSubmenu" role="button" aria-expanded="{% if request.resolver_match.namespace == 'profiles' %}true{% else %}false{% endif %}" aria-controls="profileSubmenu">
+                                    <i class="fas fa-user-circle me-2"></i> Profile
+                                </a>
+                                <div class="collapse {% if request.resolver_match.namespace == 'profiles' %}show{% endif %}" id="profileSubmenu">
+                                    <ul class="nav flex-column ps-3">
+                                        <li class="nav-item">
+                                            <a class="nav-link nav-sub-item {% if request.resolver_match.view_name == 'profiles:dashboard' %}active{% endif %}" href="{% url 'profiles:dashboard' %}">
+                                                My Dashboard
+                                            </a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link nav-sub-item {% if request.resolver_match.view_name == 'profiles:edit_profile' %}active{% endif %}" href="{% url 'profiles:edit_profile' %}">
+                                                Edit Profile
+                                            </a>
+                                        </li>
+                                        <li class="nav-item">
+                                            <a class="nav-link nav-sub-item {% if request.resolver_match.view_name == 'profiles:manage_gallery' %}active{% endif %}" href="{% url 'profiles:manage_gallery' %}">
+                                                Manage Gallery
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link rounded-md" href="{% url 'wallet:wallet_dashboard' %}"> {# Transactions link pointing to main wallet dashboard #}
+                                    <i class="fas fa-exchange-alt me-2"></i> Transactions History
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                {# Messages link - UPDATED #}
+                                <a class="nav-link {% if request.resolver_match.app_name == 'messaging' %}active{% endif %} rounded-md" href="{% url 'messaging:thread_list' %}">
+                                    <i class="fas fa-comments me-2"></i> Messages
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link rounded-md" href="#">{# Placeholder for Notifications, update with actual URL #}
+                                    <i class="fas fa-bell me-2"></i> Notifications
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'chat_with_admin:admin_chat' %}">
+                                    <i class="fas fa-headset"></i> Chat with Admin
+                                </a>
+                            </li>
+                            {% if request.user.is_staff %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'chat_with_admin:admin_dashboard' %}">
+                                    <i class="fas fa-inbox"></i> Admin Chat Inbox
+                                </a>
+                            </li>
+                            {% endif %}
+                            {% if perms.emergencies.can_request_campaign %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'emergencies:create_campaign_request' %}">
+                                    <i class="fas fa-headset"></i> Request Aid Campaign
+                                </a>
+                            </li>
+                            {% endif %}
+                            {% if user.is_authenticated and user.is_staff %}
+                            <li class="nav-item">
+                                <a class="nav-link" href="{% url 'updates:admin_post_list' %}">
+                                    <i class="fas fa-headset"></i> Manage Updates
+                                </a>
+                            </li>
+                            {% endif %}  
+                            <li class="nav-item">
+                                <a class="nav-link rounded-md" href="#">{# Placeholder for Settings, update with actual URL #}
+                                    <i class="fas fa-cog me-2"></i> Settings
+                                </a>
+                            </li>
+                        </ul>
+
+                        {# WALLET OPERATIONS SECTION #}
+                        <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted text-uppercase">
+                            <span>Wallet Operations</span>
+                        </h6>
+                        <ul class="nav flex-column mb-2">
+                            <li class="nav-item">
+                                <a class="nav-link {% if request.resolver_match.namespace == 'wallet' and request.resolver_match.url_name == 'crypto_deposit_request' %}active{% endif %} rounded-md" href="{% url 'wallet:crypto_deposit_request' %}">
+                                    <i class="fas fa-coins me-2"></i> Deposit Crypto
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {% if request.resolver_match.namespace == 'wallet' and request.resolver_match.url_name == 'p2p_deposit_request' %}active{% endif %} rounded-md" href="{% url 'wallet:p2p_deposit_request' %}">
+                                    <i class="fas fa-hand-holding-usd me-2"></i> Request P2P Deposit
+                                </a>
+                            </li>
+                            {# Link to view P2P deposit status and upload proof - this will lead to wallet_dashboard for now #}
+                            <li class="nav-item">
+                                <a class="nav-link {% if request.resolver_match.namespace == 'wallet' and request.resolver_match.url_name == 'wallet_dashboard' %}active{% endif %} rounded-md" href="{% url 'wallet:wallet_dashboard' %}?filter=p2p_deposits"> {# Added a filter param for potential future use #}
+                                    <i class="fas fa-receipt me-2"></i> My Deposit Requests
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {% if request.resolver_match.namespace == 'wallet' and request.resolver_match.url_name == 'internal_transfer' %}active{% endif %} rounded-md" href="{% url 'wallet:internal_transfer' %}">
+                                    <i class="fas fa-paper-plane me-2"></i> Internal Transfer
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {% if request.resolver_match.namespace == 'wallet' and request.resolver_match.url_name == 'crypto_withdrawal_request' %}active{% endif %} rounded-md" href="{% url 'wallet:crypto_withdrawal_request' %}">
+                                    <i class="fas fa-money-bill-alt me-2"></i> Withdraw Crypto
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {% if request.resolver_match.namespace == 'wallet' and request.resolver_match.url_name == 'p2p_withdrawal_request' %}active{% endif %} rounded-md" href="{% url 'wallet:p2p_withdrawal_request' %}">
+                                    <i class="fas fa-share-square me-2"></i> Withdraw P2P
+                                </a>
+                            </li>
+                        </ul>
+
+
+                        <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted text-uppercase">
+                            <span>My Network</span>
+                        </h6>
+                        <ul class="nav flex-column mb-2">
+                            <li class="nav-item">
+                                <a class="nav-link rounded-md" href="#">{# Placeholder for Connections, update with actual URL #}
+                                    <i class="fas fa-users me-2"></i> Connections
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link rounded-md" href="#">{# Placeholder for Opportunities, update with actual URL #}
+                                    <i class="fas fa-briefcase me-2"></i> Opportunities
+                                </a>
+                            </li>
+                        </ul>
+
+                        <hr class="my-3">
+
+                        <ul class="nav flex-column mb-2">
+                            <li class="nav-item">
+                                <a class="nav-link rounded-md" href="{% url 'accounts:logout' %}">
+                                    <i class="fas fa-sign-out-alt me-2"></i> Logout
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </nav>
+            </div>
+        </div>
+
+        {# Main Content Column #}
+        <main class="col-md-9 col-lg-10 px-md-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">{% block page_title %}Dashboard{% endblock %}</h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    {% block dashboard_header_buttons %}{% endblock %}
+                </div>
+            </div>
+
+            {# This is the block where specific dashboard content will go #}
+            {% block dashboard_content %}
+                <p>Welcome to your dashboard! Select an option from the sidebar.</p>
+            {% endblock %}
+        </main>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_head %}
+    {{ block.super }} {# Keep content from parent's extra_head block #}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha512-Fo3rlrZj/k7ujTnHg4CGR2D7kSs0V4LLanw2qksYuRlEzO+tcaEPQogQ0KaoGN26/zrn20ImR1DfuLWnOo7aBA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        /* General sidebar styling */
+        .sidebar {
+            position: sticky; /* Keeps it in place when content scrolls */
+            top: 0; /* Align to the top of its container */
+            height: calc(100vh - 48px); /* Adjust for navbar if it's 48px tall */
+            padding-top: 48px; /* Height of navbar */
+            box-shadow: inset -1px 0 0 rgba(0, 0, 0, .1);
+            overflow-y: auto; /* Enable scrolling for long content */
+        }
+
+        /* Offcanvas for mobile (sm and down) */
+        @media (max-width: 767.98px) {
+            .offcanvas-md { /* Target the offcanvas specifically for mobile breakpoints */
+                /* Adjusted for a more standard and reliable mobile width */
+                width: 80vw !important;
+                max-width: 300px !important;
+                background: linear-gradient(135deg, #008000 0%, #008000 100%);
+
+            }
+            /* Hide the desktop column on mobile */
+            .col-md-3.d-none.d-md-block {
+                display: none !important;
+            }
+            /* Add some padding to the main content on mobile */
+            main {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+        }
+
+        /* Desktop specific sidebar visibility and styling (md and up) */
+        @media (min-width: 768px) {
+            /* Ensure the row itself is a flex container and aligns items to the top */
+            .container-fluid > .row {
+                display: flex;
+                flex-wrap: nowrap; /* Prevent wrapping if columns are too wide */
+                align-items: flex-start; /* Align columns to the top */
+                min-height: calc(100vh - 48px); /* Ensure row takes up enough height */
+            }
+
+            .sidebar-desktop-column { /* Target the desktop sidebar column */
+                height: calc(100vh - 48px); /* Make the column itself take full height */
+                overflow-y: auto; /* Allow scrolling within the column */
+                position: relative; /* Establish positioning context for sticky child */
+            }
+
+            .offcanvas-md { /* Ensure offcanvas acts like a normal div on desktop */
+                /* Reset all offcanvas-specific positioning and display properties */
+                position: static !important;
+                visibility: visible !important;
+                transform: none !important;
+                width: auto !important; /* Allow column width to apply */
+                background: none !important; /* Remove offcanvas background */
+                border-right: 1px solid rgba(0,0,0,.1); /* Add a border if desired */
+                padding: 0 !important; /* Remove offcanvas padding */
+                display: block !important; /* Ensure it behaves like a block element within the column */
+                flex-shrink: 0; /* Prevent it from shrinking */
+                flex-grow: 0; /* Prevent it from growing */
+            }
+            .offcanvas-backdrop { /* Hide backdrop on desktop */
+                display: none !important;
+            }
+            #sidebarMenu { /* Apply gradient to the nav element on desktop */
+                background: linear-gradient(135deg, #008000 0%, #008000 100%);
+
+            }
+        }
+
+        /* Sidebar link styling */
+        .sidebar .nav-link {
+            font-weight: bold; /* Make text bold */
+            color: rgba(255, 255, 255, 0.9); /* Slightly transparent white for links, increased opacity */
+            transition: all 0.2s ease-in-out; /* Smooth transition for hover */
+        }
+
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link:focus {
+            color: #fff; /* Pure white on hover/focus */
+            background-color: rgba(255, 255, 255, 0.25); /* Slightly stronger transparent background on hover */
+        }
+
+        .sidebar .nav-link.active {
+            color: #fff; /* Active link is pure white */
+            background-color: rgba(255, 255, 255, 0.35); /* Stronger transparent background for active */
+            border-radius: 0.25rem; /* Match Bootstrap's default button border-radius */
+        }
+        
+        /* Added nav-sub-item styling for the collapsible menu */
+        .nav-sub-item {
+            padding-left: 2rem !important;
+            font-size: 0.95rem;
+        }
+
+        .sidebar .nav-link .fas { /* Font Awesome icons */
+            margin-right: 8px; /* Spacing between icon and text */
+        }
+
+        /* Sidebar headings */
+        .sidebar-heading {
+            font-size: .85rem; /* Slightly larger for visibility */
+            letter-spacing: .05rem;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.7); /* Lighter white for headings, increased opacity */
+        }
+
+        /* Main content area padding for fixed navbar (if your base.html has a fixed navbar) */
+        main {
+            padding-top: 0; /* Adjusted to 0 here, assuming base.html handles overall padding/margin for fixed nav */
+        }
+    </style>
+{% endblock %}
+
+{# This script is essential for the offcanvas sidebar to work on mobile #}
+{% block extra_body %}
+    {{ block.super }}
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+{% endblock %}

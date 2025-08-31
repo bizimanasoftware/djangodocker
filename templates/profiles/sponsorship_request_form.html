@@ -1,0 +1,58 @@
+{% extends "homepage/base.html" %}
+{% load static %}
+
+{% block title %}Request - {{ profile.user.get_full_name }}{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="card shadow-lg p-4">
+        <h2 class="text-center mb-4">{{ action }} {{ profile.user.get_full_name }}</h2>
+
+        <div class="row">
+            <div class="col-md-4 text-center">
+                {% if profile.profile_picture %}
+                    <img src="{{ profile.profile_picture.url }}" class="img-fluid rounded-circle mb-3 shadow" alt="Profile Picture" style="max-height: 200px;">
+                {% else %}
+                    <img src="{% static 'images/default-profile.png' %}" class="img-fluid rounded-circle mb-3 shadow" alt="Default Profile">
+                {% endif %}
+                <p class="text-muted"><strong>Category:</strong> {{ profile.category }}</p>
+            </div>
+
+            <div class="col-md-8">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        {{ form.requester_name.label_tag }}
+                        {{ form.requester_name }}
+                        {% for error in form.requester_name.errors %}
+                            <div class="text-danger small">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.requester_email.label_tag }}
+                        {{ form.requester_email }}
+                        {% for error in form.requester_email.errors %}
+                            <div class="text-danger small">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                    <div class="mb-3">
+                        {{ form.purpose.label_tag }}
+                        {{ form.purpose }}
+                        {% for error in form.purpose.errors %}
+                            <div class="text-danger small">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary btn-lg">Submit {{ action }} Request</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="mt-5 text-center">
+            <a href="{% url 'profiles:profile_detail' profile.pk %}" class="btn btn-outline-secondary">Back to Profile</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,62 @@
+{% extends "homepage/base.html" %} 
+{% load static %}
+
+{% block title %}Discover Profiles{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h1>Discover Talented Individuals</h1>
+        <p class="lead">Browse public profiles by category, talent, country or name. Please also review our <a href="{% url 'homepage:terms' %}" target="_blank" class="text-primary">Terms of Service</a> and <a href="{% url 'homepage:privacy' %}" target="_blank" class="text-primary">Privacy Policy</a>.</p>
+    </div>
+
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" action="{% url 'profiles:discover_profiles' %}" class="row g-3 align-items-center">
+                <div class="col-md-6">
+                    <input type="text" name="q" class="form-control" placeholder="Search by name, talent,country, keyword..." value="{{ search_query|default:'' }}">
+                </div>
+                <div class="col-md-4">
+                    <select name="category" class="form-select">
+                        <option value="all">All Categories</option>
+                        {% for cat in categories %}
+                        <option value="{{ cat }}" {% if selected_category == cat %}selected{% endif %}>{{ cat }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-2 d-grid">
+                    <button type="submit" class="btn btn-primary">Filter</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="row row-cols-2 row-cols-md-4 row-cols-lg-6 g-4">
+        {% for profile in profiles %}
+        <div class="col">
+            <div class="card h-100 text-center shadow-sm profile-card">
+                <a href="{% url 'profiles:profile_detail' profile.pk %}">
+                    {% if profile.profile_picture %}
+                    <img src="{{ profile.profile_picture.url }}" class="card-img-top" alt="{{ profile.user.username }}">
+                    {% else %}
+                    <img src="{% static 'images/default_avatar.png' %}" class="card-img-top" alt="Default Avatar">
+                    {% endif %}
+                </a>
+                <div class="card-body">
+                    <h5 class="card-title">{{ profile.user.get_full_name|default:profile.user.username }}</h5>
+                    {% if profile.city and profile.country %}
+                    <p class="card-text text-muted small mb-1">{{ profile.city }}, {{ profile.country }}</p>
+                    {% endif %}
+                    <p class="card-text"><span class="badge badge-green">{{ profile.category }}</span></p>
+                    <a href="{% url 'profiles:profile_detail' profile.pk %}" class="btn btn-outline-primary btn-sm mt-2">View Profile</a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <p class="text-center text-muted fs-4 mt-5">No profiles found matching your criteria.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

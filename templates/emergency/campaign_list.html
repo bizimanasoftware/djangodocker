@@ -1,0 +1,47 @@
+{% extends "homepage/base.html" %} {# Assumes you have a base.html template #}
+{% load static %}
+
+{% block title %}Active Emergency Campaigns{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="text-center mb-5">
+        <h1>Active Emergency Campaigns</h1>
+        <p class="lead text-muted">Your contribution can make a world of difference. Find a cause to support below.</p>
+    </div>
+
+    <div class="row">
+        {% if campaigns %}
+            {% for campaign in campaigns %}
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <!-- You can add an image for the campaign here if you add an ImageField to the model -->
+                    <!-- <img src="..." class="card-img-top" alt="{{ campaign.title }}"> -->
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">{{ campaign.title }}</h5>
+                        <p class="card-text text-muted flex-grow-1">{{ campaign.description|truncatewords:20 }}</p>
+                        
+                        <!-- Progress Bar -->
+                        <div class="progress-info d-flex justify-content-between mb-1">
+                            <small>Raised: ${{ campaign.current_amount|floatformat:2 }}</small>
+                            <small>Goal: ${{ campaign.goal_amount|floatformat:2 }}</small>
+                        </div>
+                        <div class="progress" style="height: 10px;">
+                            <div class="progress-bar bg-success" role="progressbar" style="width: {{ campaign.progress_percentage }}%;" aria-valuenow="{{ campaign.progress_percentage }}" aria-valuemin="0" aria-valuemax="100"></div>
+                        </div>
+                        <small class="text-muted mt-1">{{ campaign.progress_percentage|floatformat:2 }}% Funded</small>
+
+                        <!-- Link to the campaign detail page -->
+                        <a href="{{ campaign.get_absolute_url }}" class="btn btn-primary mt-3 align-self-start">View & Donate</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12 text-center">
+                <p>There are no active emergency campaigns at the moment. Please check back later.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,73 @@
+{% extends "homepage/base.html" %}
+{% load static %}
+
+{% block title %}Sponsorship & Donations — Gloex{% endblock %}
+
+{% block content %}
+
+<!-- Hero Section: The Call to Support -->
+<section class="py-5 bg-gloex-offwhite border-bottom">
+    <div class="container text-center">
+        <h1 class="display-4 fw-bold text-gloex-green">Make a Direct Impact.</h1>
+        <p class="lead text-gloex-text-muted mb-4">Your support changes lives. Choose how you want to contribute, knowing your funds go directly to the cause.</p>
+    </div>
+</section>
+
+<!-- Choose Your Impact Section -->
+<section class="container">
+    <div class="container">
+        <h2 class="text-center text-gloex-green mb-5 fw-bold">How to Contribute</h2>
+        <div class="row g-4">
+            <!-- Sponsor a Talent -->
+            <div class="col-md-6">
+                <div class="p-5 bg-gloex-light-gray rounded shadow-sm h-100 text-center">
+                    <i class="fas fa-star fa-5x text-gloex-green mb-4"></i>
+                    <h3 class="fw-bold text-gloex-green">Sponsor a Specific Talent</h3>
+                    <p class="text-gloex-text-muted">Find an individual story that inspires you. Support a footballer's training, a musician's equipment, or a student's education directly.</p>
+                    <a href="{% url 'profiles:discover_profiles' %}" class="btn btn-gloex-green btn-lg mt-3">Discover Talents to Sponsor →</a>
+                </div>
+            </div>
+            <!-- Donate to Urgent Needs -->
+            <div class="col-md-6">
+                <div class="p-5 bg-danger-light rounded shadow-sm h-100 text-center">
+                    <i class="fas fa-hand-holding-heart fa-5x text-danger mb-4"></i>
+                    <h3 class="fw-bold text-danger">Donate to Urgent Needs</h3>
+                    <p class="text-gloex-text-muted">Provide immediate relief and aid to individuals and families facing medical emergencies, natural disasters, and other crises.</p>
+                    <a href="{% url 'emergencies:campaign_list' %}" class="btn btn-danger btn-lg mt-3">Contribute to Urgent Aid →</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Transparent Process Section -->
+<section class="container border-top">
+    <div class="container">
+        <h2 class="text-center text-gloex-green mb-5 fw-bold">Our Transparent and Secure Process</h2>
+        <div class="row text-center g-4">
+            <div class="col-md-4">
+                <div class="container">
+                    <i class="fas fa-wallet fa-4x text-gloex-green mb-3"></i>
+                    <h4 class="text-gloex-green mb-2">Flexible Payments</h4>
+                    <p class="text-gloex-text-muted">Choose to donate securely via crypto or mobile money, whichever is most convenient for you.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="container">
+                    <i class="fas fa-lock fa-4x text-gloex-green mb-3"></i>
+                    <h4 class="text-gloex-green mb-2">Secure & Private</h4>
+                    <p class="text-gloex-text-muted">Your donor identity is protected by default, giving you peace of mind with every contribution.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="container">
+                    <i class="fas fa-chart-line fa-4x text-gloex-green mb-3"></i>
+                    <h4 class="text-gloex-green mb-2">Track Your Impact</h4>
+                    <p class="text-gloex-text-muted">See the direct and real-time impact of your contribution through transparent reporting and updates.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

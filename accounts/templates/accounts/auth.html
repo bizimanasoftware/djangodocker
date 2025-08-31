@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login / Register</title>
+</head>
+<body>
+    <h1>Register</h1>
+    <form method="POST" id="registerForm">
+        {% csrf_token %}
+        {{ register_form.as_p }}
+        <button type="submit" name="register" form="registerForm">Register</button>
+    </form>
+    {% if register_form.errors %}
+      <ul style="color:red;">
+      {% for field in register_form %}
+        {% for error in field.errors %}
+          <li>{{ error }}</li>
+        {% endfor %}
+      {% endfor %}
+      {% for error in register_form.non_field_errors %}
+        <li>{{ error }}</li>
+      {% endfor %}
+      </ul>
+    {% endif %}
+
+    <h1>Login</h1>
+    <form method="POST" id="loginForm">
+        {% csrf_token %}
+        {{ login_form.as_p }}
+        <button type="submit" name="login" form="loginForm">Login</button>
+    </form>
+    {% if login_form.errors %}
+      <ul style="color:red;">
+      {% for field in login_form %}
+        {% for error in field.errors %}
+          <li>{{ error }}</li>
+        {% endfor %}
+      {% endfor %}
+      {% for error in login_form.non_field_errors %}
+        <li>{{ error }}</li>
+      {% endfor %}
+      </ul>
+    {% endif %}
+</body>
+</html>

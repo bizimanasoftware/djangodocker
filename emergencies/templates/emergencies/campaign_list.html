@@ -1,0 +1,113 @@
+{% extends "homepage/base.html" %}
+{% load static %}
+
+{% block title %}Emergency Aid Campaigns{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="text-center mb-5">
+        <h1>Active Campaigns</h1>
+
+        <p class="lead">
+             Browse and support emergency aid campaigns from around the world.
+             For more information, please review our <a href="{% url 'homepage:terms' %}" target="_blank" class="text-primary">Terms of Service</a> and  <a href="{% url 'homepage:privacy' %}" target="_blank" class="text-primary">Privacy Policy</a>.
+        </p>
+
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form method="get" action="{% url 'emergencies:campaign_list' %}">
+                <div class="row g-3 align-items-center">
+                    <div class="col-md-6">
+                        <input type="text" name="q" class="form-control" placeholder="Search by keyword, city..." value="{{ search_query|default:'' }}">
+                    </div>
+                    <div class="col-md-4">
+                        <select name="country" class="form-select">
+                            <option value="all">All Countries</option>
+                            {% for country in countries %}
+                            <option value="{{ country }}" {% if selected_country == country %}selected{% endif %}>{{ country }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2 d-grid">
+                        <button type="submit" class="btn btn-primary">Filter</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="row">
+        {% for campaign in campaigns %}
+        <div class="col-12 col-md-6 col-lg-3 mb-4 d-flex align-items-stretch">
+            <div class="card shadow-sm h-100">
+                <a href="{{ campaign.get_absolute_url }}">
+                    {% if campaign.main_image %}
+                    <img src="{{ campaign.main_image.url }}" class="card-img-top" alt="{{ campaign.title }}" style="aspect-ratio: 16 / 10; object-fit: cover;">
+                    {% else %}
+                    <img src="{% static 'images/placeholder.png' %}" class="card-img-top" alt="Placeholder" style="aspect-ratio: 16 / 10; object-fit: cover;">
+                    {% endif %}
+                </a>
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title">{{ campaign.title }}</h5>
+                    
+                    {% if campaign.city and campaign.country %}
+                    <p class="card-text text-muted small mb-2">
+                        <i class="fas fa-map-marker-alt me-1"></i>{{ campaign.city }}, {{ campaign.country }}
+                    </p>
+                    {% endif %}
+                    
+                    <p class="card-text flex-grow-1">{{ campaign.description|truncatewords:13 }}</p>
+                    
+                    {% if campaign.show_progress_bar %}
+                    <div class="progress-info d-flex justify-content-between mb-1 small">
+                        <span>${{ campaign.current_amount|floatformat:0 }}</span>
+                        <span>${{ campaign.goal_amount|floatformat:0 }}</span>
+                    </div>
+                    <div class="progress mb-3" style="height: 10px;">
+                        <div class="progress-bar bg-success" role="progressbar" style="width: {{ campaign.progress_percentage }}%;" aria-valuenow="{{ campaign.progress_percentage }}"></div>
+                    </div>
+                    {% endif %}
+
+                    <a href="{{ campaign.get_absolute_url }}" class="btn btn-success mt-auto">View Details</a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="alert alert-info text-center">
+                <p class="mb-0">Your search returned no results. Please try different keywords or broaden your filter.</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if is_paginated %}
+    <nav aria-label="Page navigation">
+        <ul class="pagination justify-content-center">
+            {% if page_obj.has_previous %}
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if selected_country %}&country={{ selected_country }}{% endif %}">Previous</a></li>
+            {% else %}
+                <li class="page-item disabled"><span class="page-link">Previous</span></li>
+            {% endif %}
+
+            {% for i in paginator.page_range %}
+                {% if page_obj.number == i %}
+                    <li class="page-item active" aria-current="page"><span class="page-link">{{ i }}</span></li>
+                {% else %}
+                    <li class="page-item"><a class="page-link" href="?page={{ i }}{% if search_query %}&q={{ search_query }}{% endif %}{% if selected_country %}&country={{ selected_country }}{% endif %}">{{ i }}</a></li>
+                {% endif %}
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+                <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if selected_country %}&country={{ selected_country }}{% endif %}">Next</a></li>
+            {% else %}
+                <li class="page-item disabled"><span class="page-link">Next</span></li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+
+</div>
+{% endblock %}

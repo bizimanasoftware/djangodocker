@@ -1,0 +1,113 @@
+{% extends 'homepage/base.html' %}
+{% load static %}
+
+{% block title %}{{ profile.user.get_full_name }} - Profile{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row mb-4">
+    <div class="col-md-4 text-center">
+      <img src="{{ profile.profile_picture.url }}" class="img-thumbnail rounded-circle" width="250" height="250" alt="Profile Picture">
+      <h3 class="mt-3">{{ profile.user.get_full_name }}</h3>
+      <p class="text-muted">@{{ profile.user.username }}</p>
+      <p class="badge bg-primary">{{ profile.category }}</p>
+    </div>
+    <div class="col-md-8">
+      <h4>About</h4>
+      <p>{{ profile.bio }}</p>
+
+      {% if profile.profile_video %}
+        <h5 class="mt-4">Intro Video</h5>
+        <div class="ratio ratio-16x9">
+          <video controls>
+            <source src="{{ profile.profile_video.url }}" type="video/mp4">
+            Your browser does not support the video tag.
+          </video>
+        </div>
+      {% endif %}
+
+      <div class="mt-4 d-flex flex-wrap gap-2">
+        <a href="{% url 'profiles:sponsorship_request' profile.pk 'sponsor' %}" class="btn btn-success">Sponsor</a>
+        <a href="{% url 'profiles:sponsorship_request' profile.pk 'donate' %}" class="btn btn-warning">Donate</a>
+        <a href="{% url 'profiles:sponsorship_request' profile.pk 'connect' %}" class="btn btn-info">Connect</a>
+        <a href="{% url 'profiles:sponsorship_request' profile.pk 'hire' %}" class="btn btn-secondary">Hire</a>
+      </div>
+
+      <div class="mt-3">
+        <a href="{% url 'profiles:discover_profiles' %}" class="btn btn-outline-dark">&larr; Back to Discover</a>
+      </div>
+    </div>
+  </div>
+
+  {% if gallery_images.exists %}
+  <div class="row mt-5">
+    <h4 class="mb-4">Gallery</h4>
+    {% for image in gallery_images %}
+      <div class="col-md-3 mb-4">
+        <a href="{{ image.image.url }}" data-bs-toggle="modal" data-bs-target="#modal{{ image.id }}">
+          <img src="{{ image.image.url }}" class="img-fluid rounded border shadow-sm gallery-img" alt="Gallery Image">
+        </a>
+      </div>
+
+      <!-- Modal -->
+      <div class="modal fade" id="modal{{ image.id }}" tabindex="-1" aria-labelledby="imageModalLabel{{ image.id }}" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+          <div class="modal-content">
+            <div class="modal-body text-center">
+              <img src="{{ image.image.url }}" class="img-fluid rounded">
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- Comments Section -->
+  <div class="mt-5">
+    <h5>Leave a Comment</h5>
+    <form action="" method="post">
+      {% csrf_token %}
+      <div class="mb-3">
+        <input type="text" name="name" class="form-control" placeholder="Your Name" required>
+      </div>
+      <div class="mb-3">
+        <textarea name="comment" class="form-control" rows="4" placeholder="Your Comment... 😊🔥🎉" required></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary">Post Comment</button>
+    </form>
+
+    <div class="mt-4">
+      <h6 class="mb-3">Comments (<span id="comment-count">{{ profile.comments.count }}</span>)</h6>
+      <button class="btn btn-sm btn-outline-secondary mb-3" onclick="document.getElementById('comments-list').classList.toggle('d-none')">Toggle Comments</button>
+
+      <div id="comments-list">
+        {% for comment in profile.comments.all %}
+        <div class="card mb-2">
+          <div class="card-body">
+            <strong>{{ comment.name }}</strong>
+            <span class="text-muted float-end small">{{ comment.created_at|date:"M d, Y H:i" }}</span>
+            <p>{{ comment.comment|linebreaks }}</p>
+            {% if request.session.admin_logged_in %}
+              <form action="{% url 'delete_comment' comment.id %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+              </form>
+            {% endif %}
+          </div>
+        </div>
+        {% empty %}
+        <p class="text-muted">No comments yet.</p>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+.gallery-img:hover {
+  transform: scale(1.05);
+  transition: 0.3s ease-in-out;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,30 @@
+<!-- emergencies/templates/emergencies/create_campaign_request.html -->
+<!-- This file should already exist, but ensure it uses the new form fields -->
+{% extends "dashboards/base_dashboard.html" %}
+{% load static %}
+
+{% block title %}Request an Aid Campaign{% endblock %}
+
+{% block content %}
+<div class="container my-5">
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h3 class="mb-0">Emergency Aid Campaign Request Form</h3>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted">Fill out the details below to submit your campaign for review by our administrators. Please be as detailed as possible.</p>
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        {{ form.as_p }}
+                        <div class="d-grid">
+                           <button type="submit" class="btn btn-success btn-lg">Submit for Review</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

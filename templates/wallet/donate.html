@@ -1,0 +1,259 @@
+{# templates/wallet/donate.html #} 
+
+{% extends "homepage/base.html" %} 
+
+{% load static %} 
+
+{% block title %}Donate - Gloex Project{% endblock %} 
+
+{% block extra_head %} 
+    <script src="https://cdn.tailwindcss.com"></script> 
+    <style> 
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap'); 
+        body { 
+            font-family: 'Inter', sans-serif; 
+        } 
+    </style> 
+{% endblock %} 
+
+{% block content %} 
+{# REMOVED pt-20 from here, as the padding for the fixed header is now handled in base.html's body #}
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-b from-green-50 to-green-100 p-6"> 
+    <div class="bg-white p-8 sm:p-10 rounded-3xl shadow-2xl max-w-lg w-full text-center transform transition-transform duration-300 hover:scale-105"> 
+
+        <div class="flex flex-col items-center justify-center mb-8"> 
+            <svg class="w-16 h-16 text-red-600 mb-4 animate-pulse" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"> 
+                <path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"></path> 
+            </svg> 
+            <h1 class="text-3xl sm:text-4xl font-bold text-gray-800">Make a Difference.</h1> 
+            <p class="mt-4 text-lg text-gray-600 max-w-sm"> 
+                Your generous contribution helps us continue our mission. Every bit makes a difference! 
+            </p> 
+        </div> 
+
+        <div class="mb-8"> 
+            <h3 class="text-lg font-semibold text-gray-700 mb-4">Or choose a preset amount:</h3> 
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-4 gap-4"> 
+                {# Changed from onclick to data-amount and added preset-amount-btn class #}
+                <button type="button" data-amount="30.00"
+                        class="preset-amount-btn px-4 py-3 text-sm font-medium rounded-lg text-gray-700 bg-gray-100 hover:bg-green-100 transition duration-150 ease-in-out border border-gray-300 hover:border-green-500"> 
+                    $30 
+                </button> 
+                <button type="button" data-amount="50.00"
+                        class="preset-amount-btn px-4 py-3 text-sm font-medium rounded-lg text-gray-700 bg-gray-100 hover:bg-green-100 transition duration-150 ease-in-out border border-gray-300 hover:border-green-500"> 
+                    $50 
+                </button> 
+                <button type="button" data-amount="75.00"
+                        class="preset-amount-btn px-4 py-3 text-sm font-medium rounded-lg text-gray-700 bg-gray-100 hover:bg-green-100 transition duration-150 ease-in-out border border-gray-300 hover:border-green-500"> 
+                    $75 
+                </button> 
+                <button type="button" data-amount="100.00"
+                        class="preset-amount-btn px-4 py-3 text-sm font-medium rounded-lg text-gray-700 bg-gray-100 hover:bg-green-100 transition duration-150 ease-in-out border border-gray-300 hover:border-green-500"> 
+                    $100 
+                </button> 
+                <button type="button" data-amount="300.00"
+                        class="preset-amount-btn px-4 py-3 text-sm font-medium rounded-lg text-gray-700 bg-gray-100 hover:bg-green-100 transition duration-150 ease-in-out border border-gray-300 hover:border-green-500"> 
+                    $300 
+                </button> 
+                <button type="button" data-amount="500.00"
+                        class="preset-amount-btn px-4 py-3 text-sm font-medium rounded-lg text-gray-700 bg-gray-100 hover:bg-green-100 transition duration-150 ease-in-out border border-gray-300 hover:border-green-500"> 
+                    $500 
+                </button> 
+                <button type="button" data-amount="1000.00"
+                        class="preset-amount-btn px-4 py-3 text-sm font-medium rounded-lg text-gray-700 bg-gray-100 hover:bg-green-100 transition duration-150 ease-in-out border border-gray-300 hover:border-green-500"> 
+                    $1,000 
+                </button> 
+                <button type="button" data-amount="10000.00"
+                        class="preset-amount-btn px-4 py-3 text-sm font-medium rounded-lg text-gray-700 bg-gray-100 hover:bg-green-100 transition duration-150 ease-in-out border border-gray-300 hover:border-green-500"> 
+                    $10,000 
+                </button> 
+                <button type="button" data-amount="50000.00"
+                        class="preset-amount-btn px-4 py-3 text-sm font-medium rounded-lg text-gray-700 bg-gray-100 hover:bg-green-100 transition duration-150 ease-in-out border border-gray-300 hover:border-green-500"> 
+                    $50,000 
+                </button> 
+            </div> 
+        </div> 
+
+        <form method="post" class="space-y-6"> 
+            {% csrf_token %} 
+
+            {% for field in form %} 
+                {% if field.name == 'amount' %} 
+                    <div class="text-left"> 
+                        <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">Donation Amount (USD)</label> 
+                        <div class="mt-1 border border-gray-300 rounded-lg shadow-sm focus-within:ring-2 focus-within:ring-green-500 focus-within:border-green-500"> 
+                            {{ field }} 
+                        </div> 
+                        {% if field.errors %} 
+                            <p class="mt-2 text-sm text-red-600">{{ field.errors }}</p> 
+                        {% endif %} 
+                        <p id="min-amount-message" class="mt-2 text-sm text-gray-600 hidden"></p> 
+                    </div> 
+                {% elif field.name == 'crypto_currency' %} 
+                    <div class="text-left"> 
+                        <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">Choose a cryptocurrency</label> 
+                        <div class="mt-1"> 
+                            {{ field }} 
+                        </div> 
+                        {% if field.errors %} 
+                            <p class="mt-2 text-sm text-red-600">{{ field.errors }}</p> 
+                        {% endif %} 
+                    </div> 
+                {% else %} 
+                    <div class="text-left"> 
+                        <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1">{{ field.label }}</label> 
+                        <div class="mt-1"> 
+                            {{ field }} 
+                        </div> 
+                        {% if field.errors %} 
+                            <p class="mt-2 text-sm text-red-600">{{ field.errors }}</p> 
+                        {% endif %} 
+                    </div> 
+                {% endif %} 
+            {% endfor %} 
+
+            <div class="text-left"> 
+                <label for="id_message" class="block text-sm font-medium text-gray-700 mb-1">Leave a message (optional)</label> 
+                <div class="mt-1"> 
+                    <textarea id="id_message" name="message" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-green-500 focus:border-green-500 transition duration-150 ease-in-out" placeholder="Leave a message with your donation..."></textarea> 
+                </div> 
+            </div> 
+
+            <button type="submit" id="donate-button" class="w-full py-3 px-4 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition ease-in-out duration-150"> 
+                Donate Now 
+            </button> 
+        </form> 
+
+        <p class="mt-6 text-sm text-gray-500"> 
+            Thank you for your support. 
+        </p> 
+    </div> 
+</div> 
+
+<script> 
+    document.addEventListener('DOMContentLoaded', function() { 
+        const amountInput = document.getElementById('id_amount'); 
+        const currencySelect = document.getElementById('id_crypto_currency');
+        const minAmountMessage = document.getElementById('min-amount-message'); 
+        const donateButton = document.getElementById('donate-button'); 
+        const presetButtons = document.querySelectorAll('.preset-amount-btn'); // Select all preset buttons
+
+        // Robust check to ensure all necessary elements are present before proceeding 
+        if (!amountInput || !currencySelect || !minAmountMessage || !donateButton || presetButtons.length === 0) { 
+            console.error("Error: One or more required form elements were not found or preset buttons are missing. Cannot initialize donation script."); 
+
+            if (minAmountMessage) { 
+                minAmountMessage.textContent = 'A problem occurred. Please contact support. (Form elements are missing.)'; 
+                minAmountMessage.classList.remove('hidden', 'text-gray-600'); 
+                minAmountMessage.classList.add('text-red-600'); 
+            } 
+
+            if (donateButton) { 
+                donateButton.textContent = 'Cannot Donate'; 
+                donateButton.disabled = true; 
+            } 
+
+            console.warn("Hint: Check that the form object passed to this Django template has fields named 'amount' and 'crypto_currency' and that they are being rendered correctly with standard HTML IDs, and that preset buttons have the 'preset-amount-btn' class and 'data-amount' attribute."); 
+
+            return; 
+        } 
+
+        let minimumAmountUSD = 0; 
+
+        async function fetchMinimumAmount(currency) { 
+            if (!currency) { 
+                minAmountMessage.classList.add('hidden'); 
+                return; 
+            } 
+
+            donateButton.textContent = 'Checking minimum amount...'; 
+            donateButton.disabled = true; 
+
+            try { 
+                const response = await fetch(`{% url 'wallet:get_minimum_amount_api' %}?crypto=${currency}`);
+                const data = await response.json(); 
+
+                if (data.error) { 
+                    throw new Error(data.error); 
+                } 
+
+                minimumAmountUSD = parseFloat(data.min_amount); 
+
+                minAmountMessage.textContent = `Minimum donation amount for ${currency.toUpperCase()} is approx. $${minimumAmountUSD.toFixed(2)}.`; 
+                minAmountMessage.classList.remove('hidden', 'text-red-600'); 
+                minAmountMessage.classList.add('text-gray-600'); 
+
+                validateAmount(); 
+            } catch (error) { 
+                console.error('Error fetching minimum amount:', error); 
+                minAmountMessage.textContent = 'Could not fetch minimum amount. Please try again.'; 
+                minAmountMessage.classList.remove('hidden', 'text-gray-600'); 
+                minAmountMessage.classList.add('text-red-600'); 
+                donateButton.disabled = true; 
+                donateButton.textContent = 'Donate Now'; 
+            } 
+        } 
+
+        function validateAmount() { 
+            const currentAmount = parseFloat(amountInput.value); 
+            if (isNaN(currentAmount) || currentAmount <= 0) { 
+                minAmountMessage.textContent = "Please enter a valid donation amount."; 
+                minAmountMessage.classList.remove('text-gray-600'); 
+                minAmountMessage.classList.add('text-red-600'); 
+                donateButton.disabled = true; 
+                donateButton.textContent = 'Enter Amount'; 
+                return; 
+            } 
+
+            if (currentAmount < minimumAmountUSD) { 
+                minAmountMessage.textContent = `Donation amount must be at least $${minimumAmountUSD.toFixed(2)} for this currency.`; 
+                minAmountMessage.classList.remove('text-gray-600'); 
+                minAmountMessage.classList.add('text-red-600'); 
+                donateButton.disabled = true; 
+                donateButton.textContent = 'Amount Too Low'; 
+            } else { 
+                minAmountMessage.textContent = `Minimum donation amount for ${currencySelect.value.toUpperCase()} is approx. $${minimumAmountUSD.toFixed(2)}.`; 
+                minAmountMessage.classList.remove('text-red-600'); 
+                minAmountMessage.classList.add('text-gray-600'); 
+                donateButton.disabled = false; 
+                donateButton.textContent = 'Donate Now'; 
+            } 
+        } 
+
+        // Event listener for currency change 
+        currencySelect.addEventListener('change', (e) => { 
+            fetchMinimumAmount(e.target.value); 
+        }); 
+
+        // Event listener for manual amount input (debounced) 
+        amountInput.addEventListener('input', () => { 
+            clearTimeout(window.inputTimer); 
+            window.inputTimer = setTimeout(() => { 
+                validateAmount(); 
+            }, 300); 
+        }); 
+
+        // Event listeners for preset amount buttons
+        presetButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const amount = this.dataset.amount; // Get amount from data-amount attribute
+                amountInput.value = amount; // Set the input value
+                validateAmount(); // Call validateAmount directly
+            });
+        });
+
+        // Fetch initial minimum amount on page load
+        if (currencySelect.value) { 
+            fetchMinimumAmount(currencySelect.value); 
+        } else { 
+            minAmountMessage.classList.add('hidden'); 
+            donateButton.disabled = true; 
+            donateButton.textContent = 'Select Currency'; 
+        } 
+
+        // Initial validation call for the amount field
+        validateAmount(); 
+    }); 
+</script> 
+
+{% endblock %}

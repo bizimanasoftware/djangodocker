@@ -1,0 +1,61 @@
+{% extends 'homepage/base.html' %}
+{% load static %}
+
+{% block title %}{{ profile.user.get_full_name }} | Profile{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <!-- Profile Image & Info -->
+        <div class="col-md-4 text-center">
+            <img src="{{ profile.profile_picture.url }}" class="img-fluid rounded-circle shadow mb-3" style="max-height: 250px; object-fit: cover;" alt="Profile Picture">
+            <h3 class="fw-bold">{{ profile.user.get_full_name }}</h3>
+            <p class="text-muted">@{{ profile.user.username }}</p>
+            <span class="badge bg-primary">{{ profile.category }}</span>
+
+            {% if profile.profile_video %}
+                <div class="mt-4">
+                    <video controls class="w-100 rounded shadow">
+                        <source src="{{ profile.profile_video.url }}" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video>
+                </div>
+            {% endif %}
+
+            <div class="mt-4">
+                <a href="{% url 'profiles:sponsorship_request' profile.pk 'sponsor' %}" class="btn btn-success btn-sm">Sponsor</a>
+                <a href="{% url 'profiles:sponsorship_request' profile.pk 'donate' %}" class="btn btn-warning btn-sm">Donate</a>
+                <a href="{% url 'profiles:sponsorship_request' profile.pk 'connect' %}" class="btn btn-info btn-sm">Connect</a>
+                <a href="{% url 'profiles:sponsorship_request' profile.pk 'hire' %}" class="btn btn-dark btn-sm">Hire</a>
+            </div>
+        </div>
+
+        <!-- Bio & Description -->
+        <div class="col-md-8">
+            <h4 class="fw-bold">About</h4>
+            <p>{{ profile.bio|linebreaks }}</p>
+
+            <hr>
+
+            <h5 class="fw-bold">Gallery</h5>
+            {% if gallery_images %}
+                <div class="row">
+                    {% for image in gallery_images %}
+                        <div class="col-md-4 col-6 mb-4">
+                            <div class="card shadow-sm h-100">
+                                <img src="{{ image.image.url }}" class="card-img-top" style="height: 200px; object-fit: cover;">
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-muted">No gallery images uploaded.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="text-center mt-5">
+        <a href="{% url 'profiles:discover_profiles' %}" class="btn btn-outline-secondary">&larr; Back to Discover</a>
+    </div>
+</div>
+{% endblock %}

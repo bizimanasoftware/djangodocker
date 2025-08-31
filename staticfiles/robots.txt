@@ -1,0 +1,5 @@
+# myproject/static/robots.txt
+User-agent: *
+Disallow: /admin/
+# Tell Google and other search engines where to find your sitemap
+Sitemap: https://gloex.org/sitemap.xml

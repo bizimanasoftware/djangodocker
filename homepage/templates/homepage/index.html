@@ -1,0 +1,273 @@
+{% extends "homepage/base.html" %}
+{% load static %}
+
+{% block title %}Gloex — Empower Talents. Connect. Sponsor. Go Borderless.{% endblock %}
+
+{% block content %}
+<div class="container">
+
+    <section class="text-center pt-0 pb-3 border-bottom position-relative">
+        <div class="container">
+            <h1 class="display-4 fw-bold text-gloex-green">Empower Talents. Connect. Sponsor. Go Borderless.</h1>
+            <p class="text-gloex-text-muted small-bold-text">From rising stars to groundbreaking innovators, Gloex is where global sponsorship meets local greatness, transforming lives one talent at a time.</p>
+            <div class="mt-4 d-grid gap-3 d-md-flex justify-content-md-center">
+                <a href="{% url 'profiles:discover_profiles' %}" class="btn btn-gloex-green btn-lg animate__animated animate__fadeInUp">
+                    Discover Talents
+                </a>
+                <a href="{% url 'homepage:sponsor_donate' %}" class="btn btn-outline-gloex-green btn-lg animate__animated animate__fadeInUp animate__delay-1s">
+                    Become a Sponsor
+                </a>
+                <a href="{% url 'homepage:become_talent' %}" class="btn btn-dark btn-lg animate__animated animate__fadeInUp animate__delay-2s">
+                    Become a Talent
+                </a>
+            </div>
+            <p class="mt-4 text-small text-muted small-bold-text">Already an agent? <a href="{% url 'homepage:become_agent' %}" class="text-decoration-underline text-gloex-green">Apply or Log in here</a>.</p>
+        </div>
+    </section>
+
+    <hr>
+
+    <section class="latest-profiles">
+        <h2>Featured Talents</h2>
+        <div class="profiles-grid">
+            {% for profile in latest_profiles %}
+            <div class="profile-card">
+                <a href="{% url 'profiles:profile_detail' profile.pk %}">
+                    {% if profile.profile_picture %}
+                    <img src="{{ profile.profile_picture.url }}" alt="{{ profile.user.username }}">
+                    {% else %}
+                    <img src="{% static 'homepage/images/default-avatar.png' %}" alt="Default Avatar">
+                    {% endif %}
+                </a>
+                <h3>{{ profile.user.get_full_name|default:profile.user.username }}</h3>
+                <p>{{ profile.category }}</p>
+            </div>
+            {% empty %}
+            <p>No profiles to display right now.</p>
+            {% endfor %}
+        </div>
+    </section>
+
+    <hr>
+
+    <section class="py-3">
+        <div class="container">
+            <h2 class="text-center text-gloex-green mb-5">Explore Diverse Talent Categories</h2>
+            <p class="text-center text-gloex-text-muted small-bold-text mb-4">Each category represents a unique opportunity to make a tangible impact. Discover individuals transforming their fields directly and transparently.</p>
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                {% for category in categories %}
+                <div class="col">
+                    <div class="card shadow-sm h-100 border-gloex-green card-hover winter-card">
+                        <div class="card-body text-center">
+                            <i class="{{ category.icon_class }} fa-4x text-gloex-green mb-3"></i>
+                            <h5 class="card-title mt-3 fw-bold">{{ category.name }}</h5>
+                            <p class="text-gloex-text-muted small-bold-text">{{ category.description }}</p>
+                            <a href="{{ category.explore_url }}" class="btn btn-outline-gloex-green btn-lg mt-2 me-2">Explore</a>
+                            <a href="{% url 'homepage:sponsor_donate' %}" class="btn btn-gloex-green btn-lg mt-2">Sponsor Now</a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="text-center mt-5">
+                <a href="{% url 'profiles:discover_profiles' %}" class="btn btn-gloex-green btn-lg">View All Talent Categories ?</a>
+            </div>
+        </div>
+    </section>
+
+    <hr>
+
+    <section class="py-3">
+        <div class="container">
+            <h2 class="text-center text-gloex-green mb-5 fw-bold">How Gloex Transforms Lives</h2>
+            <div class="row text-center gy-4">
+                <div class="col-md-4">
+                    <div class="p-3 rounded shadow-sm h-100 winter-card">
+                        <h3 class="text-gloex-green mb-3">Discover</h3>
+                        <p class="text-gloex-text-muted small-bold-text">Browse a curated feed of passionate individuals with real talent. Profiles feature achievements, media, testimonials, and inspiring stories.</p>
+                        <a href="{% url 'profiles:discover_profiles' %}" class="btn btn-sm btn-outline-gloex-green mt-3">Start Exploring</a>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-3 rounded shadow-sm h-100 winter-card">
+                        <h3 class="text-gloex-green mb-3">Connect</h3>
+                        <p class="text-gloex-text-muted small-bold-text">Each talent is connected to a verified local Gloex Agent. Message directly or support anonymously through our secure, transparent channels.</p>
+                        <a href="{% url 'accounts:unified_auth' %}" class="btn btn-sm btn-outline-gloex-green mt-3">Learn More</a>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-3 rounded shadow-sm h-100 winter-card">
+                        <h3 class="text-gloex-green mb-3">Sponsor</h3>
+                        <p class="text-gloex-text-muted small-bold-text">Send your support securely using crypto or mobile money. Every penny of your donation goes directly to the talent – no middlemen, no hidden fees.</p>
+                        <a href="{% url 'homepage:sponsor_donate' %}" class="btn btn-sm btn-gloex-green mt-3">Sponsor Now</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <hr>
+
+    {% if featured_campaigns %}
+    <div class="container my-5 py-5">
+        <div class="text-center mb-5">
+            <h2>Featured Campaigns</h2>
+            <p class="lead">Join others in supporting these urgent causes.</p>
+        </div>
+
+        <div class="row">
+            {% for campaign in featured_campaigns %}
+            <div class="col-lg-3 col-md-6 mb-4 d-flex align-items-stretch">
+                <div class="card shadow-sm h-100">
+                    <a href="{{ campaign.get_absolute_url }}">
+                        {% if campaign.main_image %}
+                        <img src="{{ campaign.main_image.url }}" class="card-img-top" alt="{{ campaign.title }}" style="aspect-ratio: 16 / 10; object-fit: cover;">
+                        {% else %}
+                        <img src="{% static 'images/placeholder.png' %}" class="card-img-top" alt="Placeholder" style="aspect-ratio: 16 / 10; object-fit: cover;">
+                        {% endif %}
+                    </a>
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">{{ campaign.title }}</h5>
+                        
+                        {% if campaign.city and campaign.country %}
+                        <p class="card-text text-muted small mb-2">
+                            <i class="fas fa-map-marker-alt me-1"></i>{{ campaign.city }}, {{ campaign.country }}
+                        </p>
+                        {% endif %}
+                        
+                        <p class="card-text flex-grow-1">{{ campaign.description|truncatewords:15 }}</p>
+                        
+                        {% if campaign.show_progress_bar %}
+                        <div class="progress-info d-flex justify-content-between mb-1 small">
+                            <span>${{ campaign.current_amount|floatformat:0 }}</span>
+                            <span>${{ campaign.goal_amount|floatformat:0 }}</span>
+                        </div>
+                        <div class="progress mb-3" style="height: 10px;">
+                            <div class="progress-bar bg-success" role="progressbar" style="width: {{ campaign.progress_percentage }}%;" aria-valuenow="{{ campaign.progress_percentage }}"></div>
+                        </div>
+                        {% endif %}
+
+                        <a href="{{ campaign.get_absolute_url }}" class="btn btn-success mt-auto">Learn More & Support</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <hr>
+
+    <section class="py-3">
+        <div class="container text-center">
+            <h2 class="text-gloex-green mb-4 fw-bold">Become a Gloex Agent</h2>
+            <p class="text-gloex-text-muted small-bold-text">Empower your community and region by becoming a verified Gloex Agent.</p>
+            <ul class="list-unstyled mb-4 text-gloex-dark small-bold-text">
+                <li class="mb-2"><strong>Earn Commissions:</strong> Get rewarded for facilitating verified sponsorships.</li>
+                <li class="mb-2"><strong>Guide Local Talents:</strong> Provide essential support throughout their onboarding journey.</li>
+                <li class="mb-2"><strong>Facilitate Transparency:</strong> Ensure seamless and honest communication between sponsors and talents.</li>
+                <li class="mb-2"><strong>Represent Your Region:</strong> Be the face of Gloex, fostering growth and opportunities in your country.</li>
+            </ul>
+            <a href="{% url 'homepage:become_agent' %}" class="btn btn-gloex-green btn-lg mt-2">Apply as an Agent Today ?</a>
+        </div>
+    </section>
+
+    <hr>
+
+    <section class="py-3">
+        <div class="container">
+            <h2 class="text-center text-gloex-green mb-5 fw-bold">Why Choose Gloex? Our Core Values</h2>
+            <div class="row text-center g-4">
+                <div class="col-md-4">
+                    <div class="p-3 rounded shadow-sm h-100 winter-card">
+                        <h4 class="text-gloex-green mb-2">Borderless</h4>
+                        <p class="text-gloex-text-muted small-bold-text">Powered by blockchain and crypto for seamless global transactions.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-3 rounded shadow-sm h-100 winter-card">
+                        <h4 class="text-gloex-green mb-2">Safe & Private</h4>
+                        <p class="text-gloex-text-muted small-bold-text">Your donor identity is protected, ensuring peace of mind with every contribution.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-3 rounded shadow-sm h-100 winter-card">
+                        <h4 class="text-gloex-green mb-2">Zero Middlemen</h4>
+                        <p class="text-gloex-text-muted small-bold-text">All funds go directly to the talents, maximizing impact and minimizing fees.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-3 rounded shadow-sm h-100 winter-card">
+                        <h4 class="text-gloex-green mb-2">Verified Talents</h4>
+                        <p class="text-gloex-text-muted small-bold-text">Our rigorous Gloex badge system ensures authenticity and credibility.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-3 rounded shadow-sm h-100 winter-card">
+                        <h4 class="text-gloex-green mb-2">Transparent Impact</h4>
+                        <p class="text-gloex-text-muted small-bold-text">Track the real-time usage of your donations and witness the difference you make.</p>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-3 rounded shadow-sm h-100 winter-card">
+                        <h4 class="text-gloex-green mb-2">Diversity First</h4>
+                        <p class="text-gloex-text-muted small-bold-text">Every talent counts, and every background matters in our inclusive global community.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <hr>
+
+    <section class="py-3">
+        <div class="container">
+            <h2 class="text-center text-gloex-green mb-5 fw-bold">Voices from Our Community</h2>
+            <div class="row justify-content-center g-4">
+                <div class="col-md-6 col-lg-5">
+                    <div class="card shadow-sm h-100 winter-card">
+                        <div class="card-body">
+                            <blockquote class="blockquote mb-0 text-center">
+                                <p class="mb-0 text-gloex-dark small-bold-text">"Gloex transformed my dream of a music studio into a reality. The direct support changed everything!"</p>
+                                <footer class="blockquote-footer mt-2 small-bold-text"><strong>Emeka</strong>, Musician from Nigeria</footer>
+                            </blockquote>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-5">
+                    <div class="card shadow-sm h-100 winter-card">
+                        <div class="card-body">
+                            <blockquote class="blockquote mb-0 text-center">
+                                <p class="mb-0 text-gloex-dark small-bold-text">"Becoming a Gloex agent has not only provided me with an income but has genuinely uplifted my entire village."</p>
+                                <footer class="blockquote-footer mt-2 small-bold-text"><strong>Mary</strong>, Gloex Agent from Uganda</footer>
+                            </blockquote>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center mt-5">
+                <a href="{% url 'updates:post_list' %}" class="btn btn-outline-gloex-green btn-lg">Read More Success Stories ?</a>
+            </div>
+        </div>
+    </section>
+
+    <hr>
+
+    <section class="py-3">
+        <div class="container">
+            <h2 class="text-center text-gloex-green mb-4 fw-bold">Join the Gloex Movement!</h2>
+            <p class="text-gloex-text-muted small-bold-text">Subscribe to our newsletter and stay in the loop on new sponsorships, inspiring talent stories, and exciting Gloex features.</p>
+            <form class="row justify-content-center mt-4" method="post" action="#">
+                {% csrf_token %}
+                <div class="col-md-7 col-lg-5">
+                    <div class="input-group input-group-lg">
+                        <input type="email" name="email" class="form-control" placeholder="Enter your email address..." aria-label="Your email" required>
+                        <button class="btn btn-gloex-green" type="submit">Subscribe</button>
+                    </div>
+                </div>
+            </form>
+            <p class="mt-4 text-small text-gloex-dark small-bold-text">Connect with our community: <a href="https://t.me/yourgloextelegram" target="_blank" class="text-decoration-underline text-gloex-green">Join Telegram</a> or <a href="https://wa.me/yourgloexwhatsapp" target="_blank" class="text-decoration-underline text-gloex-green">WhatsApp</a></p>
+        </div>
+    </section>
+
+</div> {% endblock %}

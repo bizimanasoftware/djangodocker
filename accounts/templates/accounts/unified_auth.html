@@ -1,0 +1,561 @@
+{% extends "homepage/base.html" %}
+{% load static %}
+{% load widget_tweaks %} {# This line is essential for |add_class #}
+{% block title %}Login or Register{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <ul class="nav nav-tabs card-header-tabs" id="authTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        {# Set login tab as active by default if active_tab is not 'register-pane' #}
+                        <button class="nav-link {% if active_tab == 'login-pane' or not active_tab %}active{% endif %}"
+                                id="login-tab" data-bs-toggle="tab" data-bs-target="#login-pane"
+                                type="button" role="tab" aria-controls="login-pane" aria-selected="{% if active_tab == 'login-pane' or not active_tab %}true{% else %}false{% endif %}">
+                            Login
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link {% if active_tab == 'register-pane' %}active{% endif %}"
+                                id="register-tab" data-bs-toggle="tab" data-bs-target="#register-pane"
+                                type="button" role="tab" aria-controls="register-pane" aria-selected="{% if active_tab == 'register-pane' %}true{% else %}false{% endif %}">
+                            Register
+                        </button>
+                    </li>
+                </ul>
+            </div>
+            <div class="card-body">
+                <div class="tab-content" id="auth-tabs-content">
+                    {# Login Pane - UNCHANGED #}
+                    <div class="tab-pane fade {% if active_tab == 'login-pane' or not active_tab %}show active{% endif %}" id="login-pane" role="tabpanel" aria-labelledby="login-tab">
+                        <h5 class="card-title mb-3">Login to Your Account</h5>
+                        <form method="post" action="{% url 'accounts:login' %}" novalidate>
+                            {% csrf_token %}
+
+                            {% if login_form.non_field_errors %}
+                                <div class="alert alert-danger">
+                                    {% for error in login_form.non_field_errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+
+                            <div class="mb-3">
+                                <label for="{{ login_form.username.id_for_label }}" class="form-label">{{ login_form.username.label }}</label>
+                                {{ login_form.username|add_class:"form-control" }}
+                                {% if login_form.username.errors %}
+                                    <div class="invalid-feedback d-block">{{ login_form.username.errors.as_text }}</div>
+                                {% endif %}
+                            </div>
+                            <div class="mb-3">
+                                <label for="{{ login_form.password.id_for_label }}" class="form-label">{{ login_form.password.label }}</label>
+                                {{ login_form.password|add_class:"form-control" }}
+                                {% if login_form.password.errors %}
+                                    <div class="invalid-feedback d-block">{{ login_form.password.errors.as_text }}</div>
+                                {% endif %}
+                            </div>
+
+                            <div class="d-grid mt-3">
+                                <button type="submit" class="btn btn-primary">Login</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    {# Registration Pane - REVISED FOR password1 and password2 AND ADDED TERMS/PRIVACY #}
+                    <div class="tab-pane fade {% if active_tab == 'register-pane' %}show active{% endif %}" id="register-pane" role="tabpanel" aria-labelledby="register-tab">
+                        <h5 class="card-title mb-3">Create Your Account</h5>
+                        <form id="registrationForm" method="post" action="{% url 'accounts:register' %}" novalidate>
+                            {% csrf_token %}
+
+                            {# Display non-field errors at the top if any #}
+                            {% if registration_form.non_field_errors %}
+                                <div class="alert alert-danger">
+                                    {% for error in registration_form.non_field_errors %}
+                                        <p>{{ error }}</p>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+
+                            {# Render username field #}
+                            <div class="mb-3">
+                                <label for="{{ registration_form.username.id_for_label }}" class="form-label">
+                                    {{ registration_form.username.label }}
+                                    {% if registration_form.username.field.required %} <span class="text-danger">*</span>{% endif %}
+                                </label>
+                                {{ registration_form.username|add_class:"form-control" }}
+                                {% if registration_form.username.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in registration_form.username.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div id="usernameError" class="text-danger small mt-1"></div> {# For JS validation #}
+                                {% if registration_form.username.help_text %}
+                                    <div class="form-text">{{ registration_form.username.help_text|safe }}</div>
+                                {% endif %}
+                            </div>
+
+                            {# Render email field #}
+                            <div class="mb-3">
+                                <label for="{{ registration_form.email.id_for_label }}" class="form-label">
+                                    {{ registration_form.email.label }}
+                                    {% if registration_form.email.field.required %} <span class="text-danger">*</span>{% endif %}
+                                </label>
+                                {{ registration_form.email|add_class:"form-control" }}
+                                {% if registration_form.email.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in registration_form.email.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div id="emailError" class="text-danger small mt-1"></div> {# For JS validation #}
+                                {% if registration_form.email.help_text %}
+                                    <div class="form-text">{{ registration_form.email.help_text|safe }}</div>
+                                {% endif %}
+                            </div>
+
+                            {# Render password1 field (Password) #}
+                            <div class="mb-3">
+                                <label for="{{ registration_form.password1.id_for_label }}" class="form-label">
+                                    {{ registration_form.password1.label }}
+                                    {% if registration_form.password1.field.required %} <span class="text-danger">*</span>{% endif %}
+                                </label>
+                                {{ registration_form.password1|add_class:"form-control" }}
+                                {% if registration_form.password1.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in registration_form.password1.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div id="password1Error" class="text-danger small mt-1"></div> {# For JS validation #}
+                                {% if registration_form.password1.help_text %}
+                                    <div class="form-text">{{ registration_form.password1.help_text|safe }}</div>
+                                {% endif %}
+                            </div>
+
+                            {# Render password2 field (Password confirmation) #}
+                            <div class="mb-3">
+                                <label for="{{ registration_form.password2.id_for_label }}" class="form-label">
+                                    {{ registration_form.password2.label }}
+                                    {% if registration_form.password2.field.required %} <span class="text-danger">*</span>{% endif %}
+                                </label>
+                                {{ registration_form.password2|add_class:"form-control" }}
+                                {% if registration_form.password2.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in registration_form.password2.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div id="password2Error" class="text-danger small mt-1"></div> {# For JS validation #}
+                                {% if registration_form.password2.help_text %}
+                                    <div class="form-text">{{ registration_form.password2.help_text|safe }}</div>
+                                {% endif %}
+                            </div>
+
+                            {# Render user_type field #}
+                            <div class="mb-3">
+                                <label for="{{ registration_form.user_type.id_for_label }}" class="form-label">
+                                    {{ registration_form.user_type.label }}
+                                    {% if registration_form.user_type.field.required %} <span class="text-danger">*</span>{% endif %}
+                                </label>
+                                {{ registration_form.user_type|add_class:"form-select" }}
+                                {% if registration_form.user_type.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in registration_form.user_type.errors %}{{ error }}{% endfor %}
+                                    </div>
+                                {% endif %}
+                                <div id="userTypeError" class="text-danger small mt-1"></div> {# For JS validation #}
+                                {% if registration_form.user_type.help_text %}
+                                    <div class="form-text">{{ registration_form.user_type.help_text|safe }}</div>
+                                {% endif %}
+                            </div>
+
+                            {# --- NEW: Terms and Privacy Agreement Checkbox --- #}
+                            <div class="form-check mb-3">
+                                <input type="checkbox" class="form-check-input" id="id_agree_terms" name="agree_terms" required>
+                                <label class="form-check-label" for="id_agree_terms">
+                                    I agree to the <a href="{% url 'homepage:terms' %}" target="_blank" class="text-primary">Terms of Service</a> and
+                                    <a href="{% url 'homepage:privacy' %}" target="_blank" class="text-primary">Privacy Policy</a>.
+                                </label>
+                                <div id="agreeTermsError" class="text-danger small mt-1"></div> {# For JS validation #}
+                            </div>
+                            {# --------------------------------------------------- #}
+
+                            <div class="d-grid mt-3">
+                                <button type="submit" class="btn btn-success" id="registerButton" disabled>Register</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+    {{ block.super }} {# Keep any JS from homepage/base.html #}
+
+    <style>
+        /* Ensure error messages are explicitly displayed and take up space */
+        .text-danger.small.mt-1 {
+            min-height: 1.2em; /* Ensure it takes up space even when empty */
+            display: block; /* Ensure it's a block element */
+        }
+        /* Make Django's invalid-feedback visible when needed */
+        .invalid-feedback.d-block {
+            display: block !important;
+        }
+    </style>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Elements from the registration form
+        const usernameInput = document.getElementById('id_username');
+        const emailInput = document.getElementById('id_email');
+        const password1Input = document.getElementById('id_password1');
+        const password2Input = document.getElementById('id_password2');
+        const userTypeSelect = document.getElementById('id_user_type');
+        const agreeTermsCheckbox = document.getElementById('id_agree_terms'); // NEW: Get checkbox
+
+        // Error message divs (for client-side JS validation)
+        const usernameError = document.getElementById('usernameError');
+        const emailError = document.getElementById('emailError');
+        const password1Error = document.getElementById('password1Error');
+        const password2Error = document.getElementById('password2Error');
+        const userTypeError = document.getElementById('userTypeError');
+        const agreeTermsError = document.getElementById('agreeTermsError'); // NEW: Get checkbox error div
+
+        const registerButton = document.getElementById('registerButton');
+        const registrationForm = document.getElementById('registrationForm');
+
+        // Validation states
+        let isUsernameValid = false;
+        let isEmailValid = false;
+        let isPassword1Valid = false;
+        let isPassword2Valid = false;
+        let isUserTypeValid = false;
+        let isAgreeTermsValid = false; // NEW: Checkbox validation state
+
+        // Function to update the disabled state of the register button
+        function validateForm() {
+            isUserTypeValid = (userTypeSelect && userTypeSelect.value !== '');
+            isAgreeTermsValid = (agreeTermsCheckbox && agreeTermsCheckbox.checked); // NEW: Check if checkbox is checked
+
+            // console.log('Validation States (Register Form):', {
+            //      isUsernameValid,
+            //      isEmailValid,
+            //      isPassword1Valid,
+            //      isPassword2Valid,
+            //      isUserTypeValid,
+            //      isAgreeTermsValid, // NEW: Include in console log
+            //      buttonDisabled: !(isUsernameValid && isEmailValid && isPassword1Valid && isPassword2Valid && isUserTypeValid && isAgreeTermsValid)
+            // });
+
+            if (registerButton) {
+                registerButton.disabled = !(isUsernameValid && isEmailValid && isPassword1Valid && isPassword2Valid && isUserTypeValid && isAgreeTermsValid);
+            }
+        }
+
+        // Helper to get CSRF token
+        function getCsrfToken() {
+            return document.querySelector('[name=csrfmiddlewaretoken]').value;
+        }
+
+        // --- Username Validation (AJAX for uniqueness) ---
+        let usernameTypingTimer;
+        if (usernameInput) {
+            usernameInput.addEventListener('keyup', () => {
+                clearTimeout(usernameTypingTimer);
+                usernameTypingTimer = setTimeout(checkUsernameUniqueness, 500);
+            });
+            usernameInput.addEventListener('blur', checkUsernameUniqueness);
+        }
+
+        function checkUsernameUniqueness() {
+            if (!usernameInput) return;
+            const username = usernameInput.value.trim();
+            usernameError.textContent = ''; // Clear previous JS error
+            usernameInput.classList.remove('is-invalid', 'is-valid');
+
+            if (username.length === 0) {
+                usernameError.textContent = 'Username cannot be empty.';
+                usernameInput.classList.add('is-invalid');
+                isUsernameValid = false;
+                validateForm();
+                return;
+            }
+            if (username.length < 3) {
+                usernameError.textContent = 'Username must be at least 3 characters.';
+                usernameInput.classList.add('is-invalid');
+                isUsernameValid = false;
+                validateForm();
+                return;
+            }
+
+            fetch('{% url "accounts:check_username_exists" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCsrfToken()
+                },
+                body: JSON.stringify({ 'username': username })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    // Handle non-OK responses (e.g., 500 server error)
+                    return response.json().then(err => { throw new Error(err.message || `HTTP error! status: ${response.status} - ${response.statusText}`); });
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.is_taken) {
+                    usernameError.textContent = 'This username is already taken.';
+                    usernameInput.classList.add('is-invalid');
+                    isUsernameValid = false;
+                } else {
+                    usernameError.textContent = '';
+                    usernameInput.classList.add('is-valid');
+                    isUsernameValid = true;
+                }
+                validateForm();
+            })
+            .catch(error => {
+                console.error('Error checking username:', error);
+                usernameError.textContent = 'Error checking username availability. Please try again.';
+                usernameInput.classList.add('is-invalid');
+                isUsernameValid = false;
+                validateForm();
+            });
+        }
+
+        // --- Email Validation (AJAX for uniqueness & format) ---
+        let emailTypingTimer;
+        if (emailInput) {
+            emailInput.addEventListener('keyup', () => {
+                clearTimeout(emailTypingTimer);
+                emailTypingTimer = setTimeout(checkEmailValidation, 500);
+            });
+            emailInput.addEventListener('blur', checkEmailValidation);
+        }
+
+        function checkEmailValidation() {
+            if (!emailInput) return;
+            const email = emailInput.value.trim();
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            emailError.textContent = ''; // Clear previous JS error
+            emailInput.classList.remove('is-invalid', 'is-valid');
+
+            if (email.length === 0) {
+                emailError.textContent = 'Email cannot be empty.';
+                emailInput.classList.add('is-invalid');
+                isEmailValid = false;
+                validateForm();
+                return;
+            }
+            if (!emailRegex.test(email)) {
+                emailError.textContent = 'Please enter a valid email address.';
+                emailInput.classList.add('is-invalid');
+                isEmailValid = false;
+                validateForm();
+                return;
+            }
+
+            fetch('{% url "accounts:check_email_exists" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCsrfToken()
+                },
+                body: JSON.stringify({ 'email': email })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(err => { throw new Error(err.message || `HTTP error! status: ${response.status} - ${response.statusText}`); });
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.is_taken) {
+                    emailError.textContent = 'This email address is already registered.';
+                    emailInput.classList.add('is-invalid');
+                    isEmailValid = false;
+                } else {
+                    emailError.textContent = '';
+                    emailInput.classList.add('is-valid');
+                    isEmailValid = true;
+                }
+                validateForm();
+            })
+            .catch(error => {
+                console.error('Error checking email:', error);
+                emailError.textContent = 'Error checking email availability. Please try again.';
+                emailInput.classList.add('is-invalid');
+                isEmailValid = false;
+                validateForm();
+            });
+        }
+
+        // --- Password 1 Validation ---
+        if (password1Input) {
+            password1Input.addEventListener('keyup', validatePassword1);
+            password1Input.addEventListener('blur', validatePassword1);
+        }
+
+        function validatePassword1() {
+            if (!password1Input) return;
+            const password = password1Input.value;
+            let errors = [];
+            password1Error.textContent = '';
+            password1Input.classList.remove('is-invalid', 'is-valid');
+
+            if (password.length === 0) {
+                password1Error.textContent = 'Password cannot be empty.';
+                password1Input.classList.add('is-invalid');
+                isPassword1Valid = false;
+                validateForm();
+                return;
+            }
+            if (password.length < 8) {
+                errors.push('• At least 8 characters long.');
+            }
+            if (!/[A-Z]/.test(password)) {
+                errors.push('• At least one uppercase letter.');
+            }
+            if (!/[a-z]/.test(password)) {
+                errors.push('• At least one lowercase letter.');
+            }
+            if (!/\d/.test(password)) {
+                errors.push('• At least one number.');
+            }
+            if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+                errors.push('• At least one special character (!@#$%...).');
+            }
+
+            if (errors.length > 0) {
+                password1Error.innerHTML = errors.join('<br>');
+                password1Input.classList.add('is-invalid');
+                isPassword1Valid = false;
+            } else {
+                password1Error.textContent = '';
+                password1Input.classList.add('is-valid');
+                isPassword1Valid = true;
+            }
+            validatePassword2(); // Also validate password2 when password1 changes
+            validateForm();
+        }
+
+        if (password2Input) {
+            password2Input.addEventListener('keyup', validatePassword2);
+            password2Input.addEventListener('blur', validatePassword2);
+        }
+
+        function validatePassword2() {
+            if (!password2Input || !password1Input) return;
+            const password = password1Input.value;
+            const confirmPassword = password2Input.value;
+            password2Error.textContent = '';
+            password2Input.classList.remove('is-invalid', 'is-valid');
+
+            if (confirmPassword.length === 0) {
+                password2Error.textContent = 'Please confirm your password.';
+                password2Input.classList.add('is-invalid');
+                isPassword2Valid = false;
+                validateForm();
+                return;
+            } else if (password !== confirmPassword) {
+                password2Error.textContent = 'Passwords do not match.';
+                password2Input.classList.add('is-invalid');
+                isPassword2Valid = false;
+            } else {
+                password2Error.textContent = '';
+                password2Input.classList.add('is-valid');
+                isPassword2Valid = true;
+            }
+            validateForm();
+        }
+
+        // --- User Type Validation ---
+        if (userTypeSelect) {
+            userTypeSelect.addEventListener('change', validateUserType);
+            userTypeSelect.addEventListener('blur', validateUserType);
+        }
+
+        function validateUserType() {
+            if (!userTypeSelect) return;
+            isUserTypeValid = (userTypeSelect.value !== '');
+            userTypeSelect.classList.remove('is-invalid', 'is-valid');
+            userTypeError.textContent = ''; // Clear previous JS error
+
+            if (!isUserTypeValid) {
+                userTypeSelect.classList.add('is-invalid');
+                userTypeError.textContent = 'Please select a user type.'; // Set JS specific error
+            } else {
+                userTypeSelect.classList.add('is-valid');
+            }
+            validateForm();
+        }
+
+        // --- NEW: Terms and Privacy Checkbox Validation ---
+        if (agreeTermsCheckbox) {
+            agreeTermsCheckbox.addEventListener('change', validateAgreeTerms);
+        }
+
+        function validateAgreeTerms() {
+            if (!agreeTermsCheckbox) return;
+            isAgreeTermsValid = agreeTermsCheckbox.checked;
+            agreeTermsError.textContent = ''; // Clear previous JS error
+
+            if (!isAgreeTermsValid) {
+                agreeTermsError.textContent = 'You must agree to the Terms of Service and Privacy Policy.';
+            }
+            validateForm();
+        }
+
+        // --- Initial & On-Submit Validation ---
+        function runAllValidations() {
+            // Check current values by calling validation functions if elements exist
+            if (usernameInput) checkUsernameUniqueness();
+            if (emailInput) checkEmailValidation();
+            if (password1Input) validatePassword1();
+            if (password2Input) validatePassword2();
+            if (userTypeSelect) validateUserType();
+            if (agreeTermsCheckbox) validateAgreeTerms(); // NEW: Validate checkbox on load/re-render
+
+            validateForm(); // Update button state
+        }
+
+        // Run all validations shortly after DOMContentLoaded to catch autofilled values
+        setTimeout(runAllValidations, 100);
+
+
+        if (registrationForm) {
+            registrationForm.addEventListener('submit', function(event) {
+                // Re-run all validations just before submission to ensure latest state
+                runAllValidations();
+
+                // Prevent form submission if the button is disabled (meaning some validation failed)
+                setTimeout(() => {
+                    if (registerButton && registerButton.disabled) {
+                        event.preventDefault(); // Stop form submission
+                        const firstInvalid = document.querySelector('#register-pane .is-invalid'); // Target specific pane
+                        if (firstInvalid) {
+                            firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        } else if (!isAgreeTermsValid && agreeTermsError) { // If other fields are valid but checkbox isn't
+                            agreeTermsError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        }
+                    }
+                }, 50);
+            });
+        }
+
+        // Bootstrap tab activation logic (to ensure correct tab is active on reload if errors exist)
+        const activeTabPaneId = "{{ active_tab|default:'login-pane' }}";
+        if (activeTabPaneId) {
+            const activeTabButton = document.querySelector(`[data-bs-target="#${activeTabPaneId}"]`);
+            if (activeTabButton) {
+                const bsTab = new bootstrap.Tab(activeTabButton);
+                bsTab.show();
+            }
+        }
+    });
+    </script>
+{% endblock %}

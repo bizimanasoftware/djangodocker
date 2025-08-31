@@ -1,0 +1,19 @@
+{% extends "dashboards/base_dashboard.html" %}
+
+{% block page_title %}Withdrawal Status{% endblock %}
+
+{% block dashboard_content %}
+<div class="card shadow-sm">
+    <div class="card-header bg-{% if status_type == 'success' %}success{% else %}danger{% endif %} text-white">
+        <h4 class="mb-0">Withdrawal Status</h4>
+    </div>
+    <div class="card-body">
+        <p class="card-text">{{ message }}</p>
+        
+        <p class="text-muted">You will be notified once your withdrawal has been fully processed.</p>
+
+        <a href="{% url 'wallet:wallet_dashboard' %}" class="btn btn-primary mt-3">Back to Wallet Dashboard</a>
+        <a href="{% url 'wallet:crypto_withdrawal_request' %}" class="btn btn-secondary mt-3">Make another withdrawal</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,31 @@
+{% extends "dashboards/base_dashboard.html" %}
+
+{% block page_title %}Deposit Status{% endblock %}
+
+{% block dashboard_content %}
+<div class="card shadow-sm">
+    <div class="card-header bg-{% if status_type == 'success' %}success{% elif status_type == 'cancel' %}warning{% else %}danger{% endif %} text-white">
+        <h4 class="mb-0">Deposit Status</h4>
+    </div>
+    <div class="card-body">
+        <p class="card-text">{{ message }}</p>
+        
+        {% if transaction %}
+            <p><strong>Transaction ID:</strong> {{ transaction.transaction_id }}</p>
+            <p><strong>Amount:</strong> {{ transaction.amount|floatformat:8 }} USD</p>
+            {% if transaction.crypto_currency %}
+            <p><strong>Cryptocurrency:</strong> {{ transaction.crypto_currency|upper }}</p>
+            {% endif %}
+            <p><strong>Status:</strong> <span class="badge bg-{% if transaction.status == 'completed' %}success{% elif transaction.status == 'pending' or transaction.status == 'review' or transaction.status == 'awaiting_admin_instructions' or transaction.status == 'awaiting_proof_of_payment' %}warning{% else %}danger{% endif %}">{{ transaction.get_status_display }}</span></p>
+            {% if transaction.nowpayments_payment_id %}
+            <p><strong>NOWPayments ID:</strong> {{ transaction.nowpayments_payment_id }}</p>
+            {% endif %}
+        {% else %}
+            <p class="text-muted">No specific transaction details available at this time.</p>
+        {% endif %}
+
+        <a href="{% url 'wallet:wallet_dashboard' %}" class="btn btn-primary mt-3">Back to Wallet Dashboard</a>
+        <a href="{% url 'wallet:deposit_method_selection' %}" class="btn btn-secondary mt-3">Make another deposit</a>
+    </div>
+</div>
+{% endblock %}

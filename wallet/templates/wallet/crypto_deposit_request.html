@@ -1,0 +1,85 @@
+{% extends "dashboards/base_dashboard.html" %}
+{% load crispy_forms_tags %} {# This line is essential #}
+
+{% block page_title %}Crypto Deposit{% endblock %}
+
+{% block dashboard_content %}
+<div class="card shadow-sm">
+    <div class="card-header bg-primary text-white">
+        <h4 class="mb-0">Crypto Deposit</h4>
+    </div>
+    <div class="card-body">
+        <p class="card-text">Enter the amount you wish to deposit and select the cryptocurrency.</p>
+
+        {% if messages %}
+            <div class="mb-3">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <form method="post" id="crypto-deposit-form"> {# Added an ID to the form #}
+            {% csrf_token %}
+            {{ form|crispy }} {# This renders the form using Crispy Forms #}
+            <p id="min-amount-info" class="text-muted mt-2"></p> {# Placeholder for min amount info #}
+            <button type="submit" class="btn btn-success mt-3">Initiate Deposit</button>
+        </form>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const cryptoSelect = document.getElementById("id_crypto_currency"); // Get the select element for crypto currency
+        const minAmountInfo = document.getElementById("min-amount-info"); // Get the paragraph to display info
+
+        // Function to fetch and display the minimum amount
+        function fetchMinAmount() {
+            const selectedCrypto = cryptoSelect.value;
+            if (selectedCrypto) {
+                // Construct the URL using Django's URL reverse in JavaScript (best practice)
+                const url = "{% url 'wallet:get_minimum_amount_api' %}?crypto=" + selectedCrypto;
+
+                fetch(url)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error('Network response was not ok');
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.min_amount) {
+                            // Format to 2 decimal places for display, or more if precision is critical
+                            const formattedMinAmount = parseFloat(data.min_amount).toFixed(8); 
+                            minAmountInfo.textContent = `Minimum deposit for ${selectedCrypto.toUpperCase()}: $${formattedMinAmount} USD`;
+                            minAmountInfo.style.color = 'blue'; // Or any color you prefer
+                        } else {
+                            minAmountInfo.textContent = "Could not fetch minimum amount for this currency.";
+                            minAmountInfo.style.color = 'red';
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error fetching minimum amount:', error);
+                        minAmountInfo.textContent = "Error fetching minimum amount. Please try again.";
+                        minAmountInfo.style.color = 'red';
+                    });
+            } else {
+                minAmountInfo.textContent = ""; // Clear message if no crypto selected
+            }
+        }
+
+        // Add event listener for when the crypto currency selection changes
+        if (cryptoSelect) {
+            cryptoSelect.addEventListener("change", fetchMinAmount);
+
+            // Trigger fetch on page load if a default crypto is already selected
+            if (cryptoSelect.value) {
+                fetchMinAmount();
+            }
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,85 @@
+{% extends "dashboards/base_dashboard.html" %}
+{% load crispy_forms_tags %}
+
+{% block page_title %}Crypto Deposit{% endblock %}
+
+{% block dashboard_content %}
+<div class="card shadow-sm">
+    <div class="card-header bg-primary text-white">
+        <h4 class="mb-0">Crypto Deposit</h4>
+    </div>
+    <div class="card-body">
+        <p class="card-text">Enter the amount you wish to deposit and select the cryptocurrency.</p>
+
+        {% if messages %}
+            <div class="mb-3">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <div id="min-amount-display" class="alert alert-info" style="display: none;">
+            Minimum deposit for <strong id="selected-crypto-code"></strong>: 
+            <strong id="min-deposit-usd"></strong> USD (<strong id="min-deposit-crypto"></strong> <span id="min-deposit-crypto-code"></span>)
+        </div>
+
+        <form method="post" id="depositForm">
+            {% csrf_token %}
+            {{ form|crispy }}
+            <button type="submit" class="btn btn-success mt-3">Initiate Deposit</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const cryptoCurrencySelect = document.getElementById('id_crypto_currency');
+        const minAmountDisplay = document.getElementById('min-amount-display');
+        const selectedCryptoCode = document.getElementById('selected-crypto-code');
+        const minDepositUsd = document.getElementById('min-deposit-usd');
+        const minDepositCrypto = document.getElementById('min-deposit-crypto');
+        const minDepositCryptoCode = document.getElementById('min-deposit-crypto-code');
+
+        // This object will be populated by Django's template tags
+        // It contains the minimum amounts fetched from NOWPayments API
+        const minAmounts = {
+            {% for code, data in crypto_min_amounts.items %}
+                '{{ code }}': {
+                    'usd': {{ data.usd_amount|floatformat:"8" }},
+                    'crypto': {{ data.crypto_amount|floatformat:"8" }}
+                },
+            {% endfor %}
+        };
+
+        function updateMinAmountDisplay() {
+            const selectedCrypto = cryptoCurrencySelect.value;
+            const selectedCryptoText = cryptoCurrencySelect.options[cryptoCurrencySelect.selectedIndex].text;
+
+            if (minAmounts[selectedCrypto]) {
+                const usdAmount = minAmounts[selectedCrypto].usd;
+                const cryptoAmount = minAmounts[selectedCrypto].crypto;
+
+                selectedCryptoCode.textContent = selectedCryptoText;
+                minDepositUsd.textContent = usdAmount.toFixed(8);
+                minDepositCrypto.textContent = cryptoAmount.toFixed(8);
+                minDepositCryptoCode.textContent = selectedCrypto.toUpperCase();
+                minAmountDisplay.style.display = 'block';
+            } else {
+                minAmountDisplay.style.display = 'none';
+            }
+        }
+
+        // Initial update
+        updateMinAmountDisplay();
+
+        // Update on change
+        cryptoCurrencySelect.addEventListener('change', updateMinAmountDisplay);
+    });
+</script>
+{% endblock %}
