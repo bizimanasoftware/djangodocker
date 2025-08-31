@@ -116,3 +116,4 @@ This project is configured to run on PythonAnywhere. Here are the key steps to d
 ### How to Use the Admin Portal
 
 To access the Django admin, you must first create a superuser as shown in the local setup steps. Once deployed, you can log in at `https://your-username.pythonanywhere.com/admin/`. Remember to register your models in `your_app/admin.py` to manage them from the portal.
+sample: https://bizimanasoftware.pythonanywhere.com/
